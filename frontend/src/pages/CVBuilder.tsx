@@ -3,6 +3,7 @@ import { useState } from "react";
 import { tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
+import { RotatingBadge } from "../components/RotatingBadge";
 import { useAuth } from "../context/AuthContext";
 import { useCV } from "../hooks/useCV";
 
@@ -51,40 +52,53 @@ export function CVBuilder() {
   return (
     <div className="space-y-6">
       <div className="print:hidden">
-        <PageHeader
-          kicker="CV Builder"
-          title="Make your"
-          emphasis="CV."
-          subtitle={
-            <>
-              Build your CV, then tailor it to a specific job with AI.{" "}
-              {user ? "Synced to your account." : "Saved on this device only — log in to sync it."}
-            </>
-          }
-          action={
-            <div className="flex items-center gap-3">
-              <AnimatePresence mode="wait">
-                {saveStatus !== "idle" && (
-                  <motion.span
-                    key={saveStatus}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="text-xs font-medium text-gray-400 dark:text-gray-500"
-                  >
-                    {saveStatus === "saving" ? "Saving…" : "Saved ✓"}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              <button
-                onClick={() => window.print()}
-                className="whitespace-nowrap rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
-              >
-                Print / Save as PDF
-              </button>
-            </div>
-          }
-        />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <PageHeader
+            kicker="CV Builder"
+            title="Make your"
+            emphasis="CV."
+            subtitle={
+              <>
+                Build your CV, then tailor it to a specific job with AI.{" "}
+                {user ? "Synced to your account." : "Saved on this device only — log in to sync it."}
+              </>
+            }
+            action={
+              <div className="flex items-center gap-3">
+                <AnimatePresence mode="wait">
+                  {saveStatus !== "idle" && (
+                    <motion.span
+                      key={saveStatus}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-xs font-medium text-gray-400 dark:text-gray-500"
+                    >
+                      {saveStatus === "saving" ? "Saving…" : "Saved ✓"}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={() => window.print()}
+                  className="whitespace-nowrap rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
+                >
+                  Print / Save as PDF
+                </button>
+              </div>
+            }
+          />
+          <div className="relative hidden shrink-0 sm:block">
+            <motion.img
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80"
+              alt="Code on a laptop screen"
+              className="h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 lg:h-40 lg:w-80"
+            />
+            <RotatingBadge className="absolute -bottom-6 -left-6 hidden lg:block" />
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

@@ -129,8 +129,8 @@ export function SpeakingPractice() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          src="https://images.unsplash.com/photo-1616001089004-04948fc0e6c1?auto=format&fit=crop&w=800&q=80"
-          alt=""
+          src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80"
+          alt="A group having an animated conversation around a table"
           className="hidden h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 sm:block lg:h-40 lg:w-80 lg:shrink-0"
         />
       </div>

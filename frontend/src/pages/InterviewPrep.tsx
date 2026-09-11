@@ -5,6 +5,7 @@ import { getMyCV, InterviewPrepResponse, prepareInterview } from "../api/client"
 import { EmptyState } from "../components/EmptyState";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
+import { RotatingBadge } from "../components/RotatingBadge";
 import { SearchBar } from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
 
@@ -53,17 +54,30 @@ export function InterviewPrep() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        kicker="Interview Prep"
-        title="Prepare with"
-        emphasis="confidence."
-        subtitle={
-          <>
-            Search a role from what JobNeed has indexed, or paste a job description, to get likely
-            questions and talking points{user ? " tailored to your CV" : ""}.
-          </>
-        }
-      />
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <PageHeader
+          kicker="Interview Prep"
+          title="Prepare with"
+          emphasis="confidence."
+          subtitle={
+            <>
+              Search a role from what JobNeed has indexed, or paste a job description, to get likely
+              questions and talking points{user ? " tailored to your CV" : ""}.
+            </>
+          }
+        />
+        <div className="relative hidden shrink-0 sm:block">
+          <motion.img
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80"
+            alt="Two professionals in an interview-style conversation"
+            className="h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 lg:h-40 lg:w-80"
+          />
+          <RotatingBadge className="absolute -bottom-6 -left-6 hidden lg:block" />
+        </div>
+      </div>
 
       <SearchBar
         onSearch={(q) => runPrepare({ query: q })}

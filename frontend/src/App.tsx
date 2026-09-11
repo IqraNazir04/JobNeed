@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { About } from "./pages/About";
 import { Assistant } from "./pages/Assistant";
 import { CVBuilder } from "./pages/CVBuilder";
 import { Home } from "./pages/Home";
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="cv" element={<CVBuilder />} />
         <Route path="interview" element={<InterviewPrep />} />
         <Route path="speaking" element={<SpeakingPractice />} />
+        <Route path="about" element={<About />} />
         <Route path="login" element={<Login />} />
         <Route path="jobs/:id" element={<JobDetail />} />
         <Route path="*" element={<NotFound />} />

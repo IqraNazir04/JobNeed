@@ -4,7 +4,7 @@ import { PageHeader } from "../components/PageHeader";
 
 export function Assistant() {
   return (
-    <div className="relative space-y-6">
+    <div className="relative isolate space-y-6">
       <div className="pointer-events-none absolute -left-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">

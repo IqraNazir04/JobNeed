@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { Logo } from "./Logo";
 import { Marquee } from "./Marquee";
 import { PageTransition } from "./PageTransition";
 
@@ -43,13 +44,8 @@ export function Layout() {
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-paper dark:bg-paper-dark">
       <header className="sticky top-0 z-20 border-b-[3px] border-double border-gray-900 bg-paper/95 backdrop-blur-sm dark:border-gray-100 dark:bg-paper-dark/95">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-y-2 gap-x-2 px-4 py-4">
-          <NavLink to="/" className="flex shrink-0 items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-extrabold text-white shadow-md shadow-indigo-600/25">
-              J
-            </span>
-            <span className="hidden font-serif text-2xl font-bold italic tracking-tight text-gray-950 dark:text-gray-50 sm:inline">
-              JobNeed
-            </span>
+          <NavLink to="/" className="flex shrink-0 items-center">
+            <Logo markClassName="h-7 w-7" wordmarkClassName="hidden sm:inline" />
           </NavLink>
           <nav className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:flex-initial sm:gap-2">
             <div className="scrollbar-hide nav-scroll-fade flex min-w-0 items-center gap-1 overflow-x-auto rounded-full bg-gray-100 p-1 dark:bg-gray-800/60">
@@ -61,6 +57,7 @@ export function Layout() {
               <NavItem to="/cv">CV</NavItem>
               <NavItem to="/interview">Interview</NavItem>
               <NavItem to="/speaking">Speaking</NavItem>
+              <NavItem to="/about">About</NavItem>
             </div>
             <button
               onClick={toggleDark}
