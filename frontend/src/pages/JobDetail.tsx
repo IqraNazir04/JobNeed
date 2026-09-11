@@ -85,7 +85,7 @@ export function JobDetail() {
         <div className="p-7">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-950 dark:text-gray-50">
                 {job.title}
               </h1>
               <p className="mt-1.5 text-base text-gray-600 dark:text-gray-400">

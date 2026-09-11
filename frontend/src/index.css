@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .nav-scroll-fade {
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;

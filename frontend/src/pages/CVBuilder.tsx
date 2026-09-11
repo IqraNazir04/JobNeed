@@ -1,6 +1,8 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
+import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../context/AuthContext";
 import { useCV } from "../hooks/useCV";
 
@@ -11,6 +13,7 @@ const labelClass = "text-xs font-semibold text-gray-500 dark:text-gray-400";
 export function CVBuilder() {
   const {
     cv,
+    saveStatus,
     update,
     addExperience,
     updateExperience,
@@ -47,22 +50,41 @@ export function CVBuilder() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3 print:hidden">
-        <header className="space-y-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-            Make Your CV
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Build your CV, then tailor it to a specific job with AI.{" "}
-            {user ? "Synced to your account." : "Saved on this device only — log in to sync it."}
-          </p>
-        </header>
-        <button
-          onClick={() => window.print()}
-          className="whitespace-nowrap rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110"
-        >
-          Print / Save as PDF
-        </button>
+      <div className="print:hidden">
+        <PageHeader
+          kicker="CV Builder"
+          title="Make your"
+          emphasis="CV."
+          subtitle={
+            <>
+              Build your CV, then tailor it to a specific job with AI.{" "}
+              {user ? "Synced to your account." : "Saved on this device only — log in to sync it."}
+            </>
+          }
+          action={
+            <div className="flex items-center gap-3">
+              <AnimatePresence mode="wait">
+                {saveStatus !== "idle" && (
+                  <motion.span
+                    key={saveStatus}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-xs font-medium text-gray-400 dark:text-gray-500"
+                  >
+                    {saveStatus === "saving" ? "Saving…" : "Saved ✓"}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              <button
+                onClick={() => window.print()}
+                className="whitespace-nowrap rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
+              >
+                Print / Save as PDF
+              </button>
+            </div>
+          }
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

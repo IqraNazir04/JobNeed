@@ -1,7 +1,10 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getSpeakingFeedback, SpeakingFeedbackResponse } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
+import { PageHeader } from "../components/PageHeader";
+import { staggerContainer, staggerItem } from "../components/PageTransition";
 
 const QUESTION_BANK = [
   "Tell me about yourself.",
@@ -115,26 +118,28 @@ export function SpeakingPractice() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <header className="space-y-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-            Speaking Practice
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Answer out loud, and get feedback on your English — grammar, fluency, filler words,
-            and phrasing — not just what you said.
-          </p>
-        </header>
-        <img
-          src="https://images.unsplash.com/photo-1616001089004-04948fc0e6c1?auto=format&fit=crop&w=640&q=80"
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <PageHeader
+          kicker="Speaking Practice"
+          title="Sound more"
+          emphasis="fluent."
+          subtitle="Answer out loud, and get feedback on your English — grammar, fluency, filler words, and phrasing — not just what you said."
+        />
+        <motion.img
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          src="https://images.unsplash.com/photo-1616001089004-04948fc0e6c1?auto=format&fit=crop&w=800&q=80"
           alt=""
-          className="hidden h-32 w-full rounded-2xl object-cover shadow-md shadow-gray-900/10 sm:block lg:h-28 lg:w-56 lg:shrink-0"
+          className="hidden h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 sm:block lg:h-40 lg:w-80 lg:shrink-0"
         />
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{question}</p>
+          <p className="font-serif text-xl italic leading-snug text-gray-900 dark:text-gray-50">
+            “{question}”
+          </p>
           {!presetQuestion && (
             <button
               onClick={nextQuestion}
@@ -162,15 +167,24 @@ export function SpeakingPractice() {
           {supportsSpeechRecognition ? (
             <button
               onClick={isRecording ? stopRecording : startRecording}
-              className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md transition-transform hover:brightness-110 ${
+              className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md transition-transform hover:brightness-110 active:scale-[0.98] ${
                 isRecording
                   ? "bg-red-600 shadow-red-600/25"
                   : "bg-gradient-to-br from-indigo-600 to-violet-600 shadow-indigo-600/25"
               }`}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="7" />
-              </svg>
+              {isRecording && (
+                <motion.span
+                  animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  className="flex h-2.5 w-2.5 rounded-full bg-white"
+                />
+              )}
+              {!isRecording && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="7" />
+                </svg>
+              )}
               {isRecording ? "Stop recording" : "Start recording"}
             </button>
           ) : (
@@ -179,11 +193,18 @@ export function SpeakingPractice() {
               below.
             </p>
           )}
-          {isRecording && (
-            <span className="text-xs font-semibold text-red-600 dark:text-red-400">
-              ● Listening…
-            </span>
-          )}
+          <AnimatePresence>
+            {isRecording && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-xs font-semibold text-red-600 dark:text-red-400"
+              >
+                Listening…
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
 
         <textarea
@@ -206,11 +227,19 @@ export function SpeakingPractice() {
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {feedback && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-xl font-extrabold text-white shadow-md shadow-indigo-600/25">
+        <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-4">
+          <motion.div
+            variants={staggerItem}
+            className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-xl font-extrabold text-white shadow-md shadow-indigo-600/25"
+            >
               {feedback.overall_score}/10
-            </div>
+            </motion.div>
             <div>
               <p className="font-bold text-gray-900 dark:text-gray-50">Fluency &amp; clarity score</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -218,19 +247,25 @@ export function SpeakingPractice() {
                 detected
               </p>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <motion.div
+            variants={staggerItem}
+            className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+          >
             <h2 className="font-bold text-gray-900 dark:text-gray-50">What you did well</h2>
             <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-gray-700 dark:text-gray-300">
               {feedback.strengths.map((s, i) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {feedback.grammar_notes.length > 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <motion.div
+              variants={staggerItem}
+              className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+            >
               <h2 className="font-bold text-gray-900 dark:text-gray-50">Grammar notes</h2>
               <div className="mt-2 space-y-3">
                 {feedback.grammar_notes.map((note, i) => (
@@ -241,27 +276,33 @@ export function SpeakingPractice() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {feedback.vocabulary_suggestions.length > 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <motion.div
+              variants={staggerItem}
+              className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+            >
               <h2 className="font-bold text-gray-900 dark:text-gray-50">Sound more natural</h2>
               <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-gray-700 dark:text-gray-300">
                 {feedback.vocabulary_suggestions.map((v, i) => (
                   <li key={i}>{v}</li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           )}
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <motion.div
+            variants={staggerItem}
+            className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+          >
             <h2 className="font-bold text-gray-900 dark:text-gray-50">A more polished version</h2>
             <p className="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
               {feedback.improved_answer}
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {!feedback && !loading && !error && (

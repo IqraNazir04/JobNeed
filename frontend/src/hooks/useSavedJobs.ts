@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSavedJobsRemote, saveJobRemote, unsaveJobRemote, type Job } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 const STORAGE_KEY = "jobneed:saved-jobs";
 
@@ -23,6 +24,7 @@ function writeLocal(saved: Record<string, Job>) {
 
 export function useSavedJobs() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [saved, setSaved] = useState<Record<string, Job>>(() => (user ? {} : readLocal()));
 
   // Signed in: load from the account. Signed out: load (or reload, after
@@ -52,13 +54,14 @@ export function useSavedJobs() {
         else next[job.id] = job;
         return next;
       });
+      showToast(wasSaved ? "Removed from saved" : "Saved job");
       if (user) {
         // Optimistic local update above; sync to the account in the
         // background. A failure here just means the next load reconciles.
         (wasSaved ? unsaveJobRemote(job.id) : saveJobRemote(job.id)).catch(() => {});
       }
     },
-    [saved, user]
+    [saved, user, showToast]
   );
 
   return {

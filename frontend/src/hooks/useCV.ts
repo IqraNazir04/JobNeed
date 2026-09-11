@@ -80,9 +80,12 @@ function fromBackend(data: CVData): CVFormData {
   };
 }
 
+export type SaveStatus = "idle" | "saving" | "saved";
+
 export function useCV() {
   const { user } = useAuth();
   const [cv, setCV] = useState<CVFormData>(() => (user ? EMPTY_CV : readCV()));
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const skipNextSave = useRef(false);
 
   // Signed in: load from the account (skip the save-effect this triggers so
@@ -108,8 +111,14 @@ export function useCV() {
       skipNextSave.current = false;
       return;
     }
+    setSaveStatus("saving");
     const timeout = setTimeout(() => {
-      saveMyCV(toBackend(cv)).catch(() => {});
+      saveMyCV(toBackend(cv))
+        .then(() => {
+          setSaveStatus("saved");
+          setTimeout(() => setSaveStatus("idle"), 2000);
+        })
+        .catch(() => setSaveStatus("idle"));
     }, 800);
     return () => clearTimeout(timeout);
   }, [cv, user]);
@@ -156,6 +165,7 @@ export function useCV() {
 
   return {
     cv,
+    saveStatus,
     update,
     addExperience,
     updateExperience,

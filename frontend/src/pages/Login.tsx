@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
@@ -13,6 +15,7 @@ export function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   async function handleSubmit(e: FormEvent) {
@@ -22,6 +25,7 @@ export function Login() {
     try {
       if (mode === "login") await login(email, password);
       else await register(email, password);
+      showToast(mode === "login" ? "Welcome back!" : "Account created");
       navigate("/");
     } catch (err) {
       setError(
@@ -47,7 +51,10 @@ export function Login() {
 
         <div className="p-8">
           <header className="space-y-1">
-            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+              Account
+            </span>
+            <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-950 dark:text-gray-50">
               {mode === "login" ? "Log in" : "Create an account"}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -80,12 +87,21 @@ export function Login() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            {error && (
+              <motion.p
+                initial={{ x: 0 }}
+                animate={{ x: [0, -6, 6, -4, 4, 0] }}
+                transition={{ duration: 0.35 }}
+                className="text-sm text-red-600 dark:text-red-400"
+              >
+                {error}
+              </motion.p>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
             </button>

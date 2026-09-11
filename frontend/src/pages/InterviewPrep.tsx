@@ -1,7 +1,10 @@
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getMyCV, InterviewPrepResponse, prepareInterview } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
+import { PageHeader } from "../components/PageHeader";
+import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { SearchBar } from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
 
@@ -50,15 +53,17 @@ export function InterviewPrep() {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-          Interview Prep
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Search a role from what JobNeed has indexed, or paste a job description, to get likely
-          questions and talking points{user ? " tailored to your CV" : ""}.
-        </p>
-      </header>
+      <PageHeader
+        kicker="Interview Prep"
+        title="Prepare with"
+        emphasis="confidence."
+        subtitle={
+          <>
+            Search a role from what JobNeed has indexed, or paste a job description, to get likely
+            questions and talking points{user ? " tailored to your CV" : ""}.
+          </>
+        }
+      />
 
       <SearchBar
         onSearch={(q) => runPrepare({ query: q })}
@@ -88,23 +93,29 @@ export function InterviewPrep() {
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {result && (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50">
+        <motion.div variants={staggerContainer} initial="hidden" animate="show" className="space-y-4">
+          <motion.div
+            variants={staggerItem}
+            className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+          >
+            <h2 className="font-serif text-xl font-bold text-gray-950 dark:text-gray-50">
               {result.job_title}
-              {result.company && ` · ${result.company}`}
+              {result.company && <span className="text-gray-500 dark:text-gray-400"> · {result.company}</span>}
             </h2>
             <p className="mt-1.5 text-sm text-gray-700 dark:text-gray-300">{result.role_summary}</p>
-          </div>
+          </motion.div>
 
           <div className="space-y-3">
             {result.questions.map((q, i) => (
-              <div
+              <motion.div
                 key={i}
+                variants={staggerItem}
                 className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-semibold text-gray-900 dark:text-gray-50">{q.question}</p>
+                  <p className="font-serif text-lg italic leading-snug text-gray-900 dark:text-gray-50">
+                    “{q.question}”
+                  </p>
                   <span
                     className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
                       CATEGORY_CLASS[q.category] ??
@@ -125,19 +136,22 @@ export function InterviewPrep() {
                 >
                   Practice answering this out loud →
                 </Link>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <motion.div
+            variants={staggerItem}
+            className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+          >
             <h2 className="font-bold text-gray-900 dark:text-gray-50">Before you go in</h2>
             <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-gray-700 dark:text-gray-300">
               {result.research_tips.map((tip, i) => (
                 <li key={i}>{tip}</li>
               ))}
             </ul>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {!result && !loading && !error && (
