@@ -42,7 +42,7 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-paper dark:bg-paper-dark">
-      <header className="sticky top-0 z-20 border-b-[3px] border-double border-gray-900 bg-paper/95 backdrop-blur-sm dark:border-gray-100 dark:bg-paper-dark/95">
+      <header className="sticky top-0 z-20 border-b-[3px] border-double border-gray-900 bg-paper/75 backdrop-blur-lg dark:border-gray-100 dark:bg-paper-dark/75">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-y-2 gap-x-2 px-4 py-4">
           <NavLink to="/" className="flex shrink-0 items-center">
             <Logo markClassName="h-7 w-7" wordmarkClassName="hidden sm:inline" />
@@ -50,14 +50,14 @@ export function Layout() {
           <nav className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:flex-initial sm:gap-2">
             <div className="scrollbar-hide nav-scroll-fade flex min-w-0 items-center gap-1 overflow-x-auto rounded-full bg-gray-100 p-1 dark:bg-gray-800/60">
               <NavItem to="/" end>
-                Search
+                Home
               </NavItem>
+              <NavItem to="/search">Search</NavItem>
               <NavItem to="/assistant">Assistant</NavItem>
               <NavItem to="/saved">Saved</NavItem>
               <NavItem to="/cv">CV</NavItem>
               <NavItem to="/interview">Interview</NavItem>
               <NavItem to="/speaking">Speaking</NavItem>
-              <NavItem to="/about">About</NavItem>
             </div>
             <button
               onClick={toggleDark}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getJob, Job } from "../api/client";
+import { ConfettiBurst } from "../components/ConfettiBurst";
 import { EmptyState } from "../components/EmptyState";
 import { useSavedJobs } from "../hooks/useSavedJobs";
 
@@ -28,6 +29,7 @@ export function JobDetail() {
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
   const [status, setStatus] = useState<Status>("loading");
+  const [burstKey, setBurstKey] = useState(0);
   const { isSaved, toggleSaved } = useSavedJobs();
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export function JobDetail() {
   return (
     <article className="space-y-4">
       <Link
-        to="/"
+        to="/search"
         className="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 transition-transform hover:-translate-x-0.5 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -116,19 +118,23 @@ export function JobDetail() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110"
-            >
-              View original posting
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <path d="M15 3h6v6" />
-                <path d="M10 14L21 3" />
-              </svg>
-            </a>
+            <span className="relative inline-block">
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setBurstKey((k) => k + 1)}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
+              >
+                View original posting
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <path d="M15 3h6v6" />
+                  <path d="M10 14L21 3" />
+                </svg>
+              </a>
+              <ConfettiBurst burstKey={burstKey} />
+            </span>
             <Link
               to={`/interview?job_id=${encodeURIComponent(job.id)}`}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-700 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"

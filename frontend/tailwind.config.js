@@ -18,11 +18,16 @@ export default {
       animation: {
         marquee: "marquee 22s linear infinite",
         "spin-slow": "spin 12s linear infinite",
+        shimmer: "shimmer 1.6s ease-in-out infinite",
       },
       keyframes: {
         marquee: {
           "0%": { transform: "translateX(0%)" },
           "100%": { transform: "translateX(-50%)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "150% 0" },
+          "100%": { backgroundPosition: "-50% 0" },
         },
       },
     },

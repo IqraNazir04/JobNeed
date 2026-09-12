@@ -15,13 +15,13 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Home />} />
+        <Route index element={<About />} />
+        <Route path="search" element={<Home />} />
         <Route path="assistant" element={<Assistant />} />
         <Route path="saved" element={<SavedJobs />} />
         <Route path="cv" element={<CVBuilder />} />
         <Route path="interview" element={<InterviewPrep />} />
         <Route path="speaking" element={<SpeakingPractice />} />
-        <Route path="about" element={<About />} />
         <Route path="login" element={<Login />} />
         <Route path="jobs/:id" element={<JobDetail />} />
         <Route path="*" element={<NotFound />} />

@@ -1,9 +1,55 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { ComparisonRow, FeatureComparison } from "../components/FeatureComparison";
+import { GradientMesh } from "../components/GradientMesh";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
+import { PhotoScroller, ScrollerPhoto } from "../components/PhotoScroller";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { Slide, Slider } from "../components/Slider";
+
+const COMPARISON: ComparisonRow[] = [
+  { feature: "Job sources searched at once", without: "1", withUs: "6" },
+  { feature: "CV tailored to the job description", without: false, withUs: true },
+  { feature: "Interview questions from the real posting", without: false, withUs: true },
+  { feature: "Feedback on spoken English", without: false, withUs: true },
+  { feature: "Typical time per application", without: "~45 min", withUs: "~5 min" },
+];
+
+const PHOTOS: ScrollerPhoto[] = [
+  {
+    src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80",
+    alt: "An overhead view of a desk with laptops and notebooks",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80",
+    alt: "A modern office interior",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80",
+    alt: "An open-plan office full of people working",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1560264357-8d9202250f21?auto=format&fit=crop&w=900&q=80",
+    alt: "A team focused on computer monitors",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=900&q=80",
+    alt: "A person working in a server room",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",
+    alt: "A team collaborating around a table with laptops",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=900&q=80",
+    alt: "A presenter leading a meeting",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=900&q=80",
+    alt: "Two colleagues celebrating with a high five",
+  },
+];
 
 const iconProps = {
   width: 24,
@@ -81,7 +127,7 @@ export function About() {
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <PageHeader
-          kicker="About"
+          kicker="Home"
           title="Built for the modern"
           emphasis="job search."
           subtitle="JobNeed is a single place to search, prepare, and apply — with AI doing the tedious parts so you can focus on the roles that actually fit."
@@ -99,27 +145,42 @@ export function About() {
         </div>
       </div>
 
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-3 gap-3 sm:gap-4"
-      >
-        {STATS.map((s) => (
+      <GradientMesh>
+        <div className="p-6 sm:p-10">
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
+            By the numbers
+          </span>
           <motion.div
-            key={s.label}
-            variants={staggerItem}
-            className="rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm shadow-gray-900/[0.03] dark:border-gray-800 dark:bg-gray-900 dark:shadow-none sm:p-6"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="mt-4 grid grid-cols-3 gap-3 sm:gap-4"
           >
-            <div className="font-serif text-3xl font-bold text-indigo-600 dark:text-indigo-400 sm:text-4xl">
-              {s.value}
-            </div>
-            <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              {s.label}
-            </div>
+            {STATS.map((s) => (
+              <motion.div
+                key={s.label}
+                variants={staggerItem}
+                className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center shadow-lg shadow-black/10 backdrop-blur-xl sm:p-6"
+              >
+                <div className="font-serif text-3xl font-bold text-white sm:text-4xl">{s.value}</div>
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-white/70">
+                  {s.label}
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
-        ))}
-      </motion.div>
+        </div>
+      </GradientMesh>
+
+      <div className="space-y-3">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+          Why JobNeed
+        </span>
+        <h2 className="font-serif text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
+          Compare it to <em className="italic text-indigo-600 dark:text-indigo-400">doing it yourself.</em>
+        </h2>
+        <FeatureComparison rows={COMPARISON} />
+      </div>
 
       <div className="relative isolate space-y-3">
         <div
@@ -146,12 +207,22 @@ export function About() {
         <Slider slides={SLIDES} />
       </div>
 
+      <div className="space-y-3">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+          Gallery
+        </span>
+        <h2 className="font-serif text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
+          Real work, <em className="italic text-indigo-600 dark:text-indigo-400">real teams.</em>
+        </h2>
+        <PhotoScroller photos={PHOTOS} />
+      </div>
+
       <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm shadow-gray-900/[0.03] dark:border-gray-800 dark:bg-gray-900 dark:shadow-none">
         <p className="font-serif text-xl italic text-gray-800 dark:text-gray-200">
           "Search once, prepare everywhere."
         </p>
         <Link
-          to="/"
+          to="/search"
           className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
         >
           Start searching
