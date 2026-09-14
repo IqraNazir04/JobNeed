@@ -14,6 +14,14 @@ export interface SearchResult {
   score: number;
 }
 
+export type ApplicationStatus = "saved" | "applied" | "interviewing" | "offer" | "rejected";
+
+export interface SavedJobEntry {
+  job: Job;
+  status: ApplicationStatus;
+  created_at: string;
+}
+
 export interface ChatResponse {
   answer: string;
   matches: Job[];
@@ -48,6 +56,10 @@ export interface TailorCVResponse {
   tailored_summary: string;
   emphasized_skills: string[];
   notes: string;
+}
+
+export interface CoverLetterResponse {
+  cover_letter: string;
 }
 
 export interface InterviewQuestion {
@@ -89,12 +101,34 @@ export interface SpeakingFeedbackResponse {
 export interface User {
   id: string;
   email: string;
+  linkedin_url: string;
+  indeed_url: string;
+  upwork_url: string;
+  github_username: string;
 }
 
 export interface AuthResponse {
   access_token: string;
   token_type: string;
   user: User;
+}
+
+export interface ProfileUpdate {
+  linkedin_url: string;
+  indeed_url: string;
+  upwork_url: string;
+  github_username: string;
+}
+
+export interface GithubStats {
+  username: string;
+  name: string;
+  bio: string;
+  public_repos: number;
+  followers: number;
+  top_languages: string[];
+  avatar_url: string;
+  profile_url: string;
 }
 
 let authToken: string | null = null;
@@ -148,6 +182,18 @@ export function tailorCV(cv: CVData, jobDescription: string): Promise<TailorCVRe
   });
 }
 
+export function generateCoverLetter(
+  cv: CVData,
+  jobDescription: string,
+  company = "",
+  jobTitle = ""
+): Promise<CoverLetterResponse> {
+  return request("/cv/cover-letter", {
+    method: "POST",
+    body: JSON.stringify({ cv, job_description: jobDescription, company, job_title: jobTitle }),
+  });
+}
+
 export function getMyCV(): Promise<CVData> {
   return request("/cv");
 }
@@ -174,8 +220,26 @@ export function getMe(): Promise<User> {
   return request("/auth/me");
 }
 
-export function getSavedJobsRemote(): Promise<Job[]> {
+export function updateProfile(profile: ProfileUpdate): Promise<User> {
+  return request("/auth/profile", { method: "PATCH", body: JSON.stringify(profile) });
+}
+
+export function getGithubStats(username: string): Promise<GithubStats> {
+  return request(`/auth/github-stats/${encodeURIComponent(username)}`);
+}
+
+export function getSavedJobsRemote(): Promise<SavedJobEntry[]> {
   return request("/saved-jobs");
+}
+
+export function updateSavedJobStatusRemote(
+  id: string,
+  status: ApplicationStatus
+): Promise<SavedJobEntry> {
+  return request(`/saved-jobs/${encodeURIComponent(id)}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
 }
 
 export function saveJobRemote(id: string): Promise<void> {

@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getSpeakingFeedback, SpeakingFeedbackResponse } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
+import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const QUESTION_BANK = [
   "Tell me about yourself.",
@@ -40,6 +42,11 @@ function getSpeechRecognitionCtor(): (new () => SpeechRecognitionLike) | null {
 }
 
 export function SpeakingPractice() {
+  usePageMeta(
+    "English Speaking Practice for Interviews",
+    "Practice answering interview questions out loud and get AI feedback on grammar, fluency, and phrasing."
+  );
+
   const [searchParams] = useSearchParams();
   const presetQuestion = searchParams.get("q");
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -137,7 +144,7 @@ export function SpeakingPractice() {
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-start justify-between gap-3">
-          <p className="font-serif text-xl italic leading-snug text-gray-900 dark:text-gray-50">
+          <p className="font-heading text-xl font-semibold leading-snug text-gray-900 dark:text-gray-50">
             “{question}”
           </p>
           {!presetQuestion && (
@@ -306,10 +313,13 @@ export function SpeakingPractice() {
       )}
 
       {!feedback && !loading && !error && (
-        <EmptyState
-          title="Ready when you are"
-          description="Record or type your answer above, then get feedback on your English."
-        />
+        <div className="space-y-4">
+          <EmptyState
+            title="Ready when you are"
+            description="Record or type your answer above, then get feedback on your English."
+          />
+          <MotivationalQuote className="mx-auto max-w-lg" />
+        </div>
       )}
     </div>
   );

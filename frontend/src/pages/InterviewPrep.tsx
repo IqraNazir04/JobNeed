@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getMyCV, InterviewPrepResponse, prepareInterview } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
+import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { SearchBar } from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const CATEGORY_CLASS: Record<string, string> = {
   Behavioral: "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300",
@@ -19,6 +21,11 @@ const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 
 export function InterviewPrep() {
+  usePageMeta(
+    "Interview Preparation",
+    "Get AI-generated interview questions and talking points tailored to a specific job posting."
+  );
+
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
@@ -112,7 +119,7 @@ export function InterviewPrep() {
             variants={staggerItem}
             className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
           >
-            <h2 className="font-serif text-xl font-bold text-gray-950 dark:text-gray-50">
+            <h2 className="font-heading text-xl font-bold text-gray-950 dark:text-gray-50">
               {result.job_title}
               {result.company && <span className="text-gray-500 dark:text-gray-400"> · {result.company}</span>}
             </h2>
@@ -127,7 +134,7 @@ export function InterviewPrep() {
                 className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-serif text-lg italic leading-snug text-gray-900 dark:text-gray-50">
+                  <p className="font-heading text-lg font-semibold leading-snug text-gray-900 dark:text-gray-50">
                     “{q.question}”
                   </p>
                   <span
@@ -169,10 +176,13 @@ export function InterviewPrep() {
       )}
 
       {!result && !loading && !error && (
-        <EmptyState
-          title="Ready when you are"
-          description="Search a role or paste a job description to get started."
-        />
+        <div className="space-y-4">
+          <EmptyState
+            title="Ready when you are"
+            description="Search a role or paste a job description to get started."
+          />
+          <MotivationalQuote className="mx-auto max-w-lg" />
+        </div>
       )}
     </div>
   );

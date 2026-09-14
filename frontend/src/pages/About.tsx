@@ -2,11 +2,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ComparisonRow, FeatureComparison } from "../components/FeatureComparison";
 import { GradientMesh } from "../components/GradientMesh";
+import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { PhotoScroller, ScrollerPhoto } from "../components/PhotoScroller";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { Slide, Slider } from "../components/Slider";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const COMPARISON: ComparisonRow[] = [
   { feature: "Job sources searched at once", without: "1", withUs: "6" },
@@ -120,6 +122,11 @@ const STATS = [
 ];
 
 export function About() {
+  usePageMeta(
+    "AI-Powered Job Search & Career Platform",
+    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, and Google Jobs in one place. Tailor your CV, write cover letters, prep for interviews, and practice your spoken English — all powered by AI."
+  );
+
   return (
     <div className="relative isolate space-y-10">
       <div className="pointer-events-none absolute -left-24 -top-10 -z-10 h-80 w-80 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
@@ -145,6 +152,18 @@ export function About() {
         </div>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-[1.6fr_1fr]">
+        <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          Job searching is one of the most time-consuming things most people do — juggling half a
+          dozen tabs of job boards, rewriting the same CV over and over, and guessing what an
+          interviewer might ask. JobNeed exists to take the repetitive parts off your plate: one
+          search across every source, one CV that adapts to each role, and real practice before it
+          counts. The goal isn't to replace your judgment about which roles are worth pursuing — it's
+          to give you back the time and energy to make that judgment well.
+        </p>
+        <MotivationalQuote />
+      </div>
+
       <GradientMesh>
         <div className="p-6 sm:p-10">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
@@ -162,7 +181,7 @@ export function About() {
                 variants={staggerItem}
                 className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center shadow-lg shadow-black/10 backdrop-blur-xl sm:p-6"
               >
-                <div className="font-serif text-3xl font-bold text-white sm:text-4xl">{s.value}</div>
+                <div className="font-heading text-3xl font-bold text-white sm:text-4xl">{s.value}</div>
                 <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-white/70">
                   {s.label}
                 </div>
@@ -176,8 +195,8 @@ export function About() {
         <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
           Why JobNeed
         </span>
-        <h2 className="font-serif text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
-          Compare it to <em className="italic text-indigo-600 dark:text-indigo-400">doing it yourself.</em>
+        <h2 className="font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
+          Compare it to <span className="text-indigo-600 dark:text-indigo-400">doing it yourself.</span>
         </h2>
         <FeatureComparison rows={COMPARISON} />
       </div>
@@ -211,14 +230,14 @@ export function About() {
         <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
           Gallery
         </span>
-        <h2 className="font-serif text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
-          Real work, <em className="italic text-indigo-600 dark:text-indigo-400">real teams.</em>
+        <h2 className="font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
+          Real work, <span className="text-indigo-600 dark:text-indigo-400">real teams.</span>
         </h2>
         <PhotoScroller photos={PHOTOS} />
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm shadow-gray-900/[0.03] dark:border-gray-800 dark:bg-gray-900 dark:shadow-none">
-        <p className="font-serif text-xl italic text-gray-800 dark:text-gray-200">
+        <p className="font-heading text-xl font-semibold text-gray-800 dark:text-gray-200">
           "Search once, prepare everywhere."
         </p>
         <Link

@@ -4,8 +4,16 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import create_access_token, hash_password, verify_password
+from app.integrations.github import fetch_github_stats
 from app.models.user import User
-from app.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserOut
+from app.schemas.auth import (
+    GithubStats,
+    LoginRequest,
+    ProfileUpdateRequest,
+    TokenResponse,
+    UserCreate,
+    UserOut,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -37,3 +45,23 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.patch("/profile", response_model=UserOut)
+def update_profile(
+    payload: ProfileUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.linkedin_url = payload.linkedin_url
+    current_user.indeed_url = payload.indeed_url
+    current_user.upwork_url = payload.upwork_url
+    current_user.github_username = payload.github_username
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.get("/github-stats/{username}", response_model=GithubStats)
+def github_stats(username: str, current_user: User = Depends(get_current_user)):
+    return fetch_github_stats(username)

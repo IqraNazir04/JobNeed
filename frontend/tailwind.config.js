@@ -6,7 +6,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["'Plus Jakarta Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["'Playfair Display'", "ui-serif", "Georgia", "serif"],
+        heading: ["'Inter'", "'Plus Jakarta Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {

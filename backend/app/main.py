@@ -6,9 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import app.models  # noqa: F401 - registers all models on Base.metadata
 from app.api.routes import auth, chat, cv, interview, jobs, saved_jobs, search, speaking
 from app.core.config import settings
-from app.core.database import Base, engine
+from app.core.database import Base, engine, run_lightweight_migrations
 
 Base.metadata.create_all(bind=engine)
+run_lightweight_migrations()
 
 if settings.jwt_secret_key == "dev-insecure-secret-change-me-in-your-own-dotenv-file":
     logging.getLogger("uvicorn.error").warning(

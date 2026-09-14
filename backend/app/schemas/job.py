@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
+
+ApplicationStatus = Literal["saved", "applied", "interviewing", "offer", "rejected"]
 
 
 class JobOut(BaseModel):
@@ -14,6 +17,16 @@ class JobOut(BaseModel):
     posted_at: datetime | None = None
 
     model_config = {"from_attributes": True}
+
+
+class SavedJobOut(BaseModel):
+    job: JobOut
+    status: ApplicationStatus
+    created_at: datetime
+
+
+class UpdateStatusRequest(BaseModel):
+    status: ApplicationStatus
 
 
 class ImportUrlRequest(BaseModel):

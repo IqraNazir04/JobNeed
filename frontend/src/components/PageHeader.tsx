@@ -32,13 +32,13 @@ export function PageHeader({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.05 }}
-          className="font-serif text-4xl font-bold leading-[1.08] tracking-tight text-gray-950 dark:text-gray-50 sm:text-5xl"
+          className="font-heading text-4xl font-extrabold leading-[1.08] tracking-tight text-gray-950 dark:text-gray-50 sm:text-5xl"
         >
           {title}
           {emphasis && (
             <>
               {" "}
-              <em className="italic text-indigo-600 dark:text-indigo-400">{emphasis}</em>
+              <span className="text-indigo-600 dark:text-indigo-400">{emphasis}</span>
             </>
           )}
         </motion.h1>

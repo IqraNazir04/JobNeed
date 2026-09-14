@@ -1,20 +1,38 @@
 import { useCallback, useEffect, useState } from "react";
-import { getSavedJobsRemote, saveJobRemote, unsaveJobRemote, type Job } from "../api/client";
+import {
+  ApplicationStatus,
+  getSavedJobsRemote,
+  saveJobRemote,
+  unsaveJobRemote,
+  updateSavedJobStatusRemote,
+  type Job,
+} from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 
 const STORAGE_KEY = "jobneed:saved-jobs";
 
-function readLocal(): Record<string, Job> {
+interface SavedEntry {
+  job: Job;
+  status: ApplicationStatus;
+}
+
+function readLocal(): Record<string, SavedEntry> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, Job | SavedEntry>;
+    const migrated: Record<string, SavedEntry> = {};
+    for (const [id, value] of Object.entries(parsed)) {
+      migrated[id] = "status" in value && "job" in value ? value : { job: value as Job, status: "saved" };
+    }
+    return migrated;
   } catch {
     return {};
   }
 }
 
-function writeLocal(saved: Record<string, Job>) {
+function writeLocal(saved: Record<string, SavedEntry>) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
   } catch {
@@ -25,7 +43,7 @@ function writeLocal(saved: Record<string, Job>) {
 export function useSavedJobs() {
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [saved, setSaved] = useState<Record<string, Job>>(() => (user ? {} : readLocal()));
+  const [saved, setSaved] = useState<Record<string, SavedEntry>>(() => (user ? {} : readLocal()));
 
   // Signed in: load from the account. Signed out: load (or reload, after
   // logout) from this device's local copy.
@@ -35,7 +53,9 @@ export function useSavedJobs() {
       return;
     }
     getSavedJobsRemote()
-      .then((jobs) => setSaved(Object.fromEntries(jobs.map((j) => [j.id, j]))))
+      .then((entries) =>
+        setSaved(Object.fromEntries(entries.map((e) => [e.job.id, { job: e.job, status: e.status }])))
+      )
       .catch(() => {});
   }, [user]);
 
@@ -51,7 +71,7 @@ export function useSavedJobs() {
       setSaved((prev) => {
         const next = { ...prev };
         if (wasSaved) delete next[job.id];
-        else next[job.id] = job;
+        else next[job.id] = { job, status: "saved" };
         return next;
       });
       showToast(wasSaved ? "Removed from saved" : "Saved job");
@@ -64,9 +84,20 @@ export function useSavedJobs() {
     [saved, user, showToast]
   );
 
+  const updateStatus = useCallback(
+    (jobId: string, status: ApplicationStatus) => {
+      setSaved((prev) => (jobId in prev ? { ...prev, [jobId]: { ...prev[jobId], status } } : prev));
+      if (user) {
+        updateSavedJobStatusRemote(jobId, status).catch(() => {});
+      }
+    },
+    [user]
+  );
+
   return {
-    savedJobs: Object.values(saved).sort((a, b) => a.title.localeCompare(b.title)),
+    savedJobs: Object.values(saved).sort((a, b) => a.job.title.localeCompare(b.job.title)),
     isSaved,
     toggleSaved,
+    updateStatus,
   };
 }

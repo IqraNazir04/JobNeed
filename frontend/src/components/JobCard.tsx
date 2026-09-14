@@ -32,7 +32,7 @@ export function JobCard({
         </button>
       )}
       <Link to={`/jobs/${job.id}`} className="block pr-7">
-        <h3 className="font-serif text-lg font-bold leading-snug tracking-tight text-gray-950 dark:text-gray-50">
+        <h3 className="font-heading text-lg font-bold leading-snug tracking-tight text-gray-950 dark:text-gray-50">
           {job.title}
         </h3>
         {score !== undefined && (

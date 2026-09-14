@@ -35,3 +35,14 @@ class TailorCVResponse(BaseModel):
     tailored_summary: str
     emphasized_skills: list[str]
     notes: str
+
+
+class CoverLetterRequest(BaseModel):
+    cv: CVData
+    job_description: str
+    company: str = ""
+    job_title: str = ""
+
+
+class CoverLetterResponse(BaseModel):
+    cover_letter: str

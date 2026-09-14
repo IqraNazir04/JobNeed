@@ -58,7 +58,7 @@ export function Slider({ slides }: { slides: Slide[] }) {
               <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
                 {slide.kicker}
               </span>
-              <h3 className="mt-2 font-serif text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
+              <h3 className="mt-2 font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
                 {slide.title}
               </h3>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-gray-600 dark:text-gray-400">

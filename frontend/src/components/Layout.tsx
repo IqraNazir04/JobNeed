@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { Footer } from "./Footer";
 import { Logo } from "./Logo";
 import { Marquee } from "./Marquee";
 import { PageTransition } from "./PageTransition";
@@ -36,13 +37,12 @@ function NavItem({ to, end, children }: { to: string; end?: boolean; children: R
 
 export function Layout() {
   const { dark, toggleDark } = useDarkMode();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-paper dark:bg-paper-dark">
-      <header className="sticky top-0 z-20 border-b-[3px] border-double border-gray-900 bg-paper/75 backdrop-blur-lg dark:border-gray-100 dark:bg-paper-dark/75">
+      <header className="sticky top-0 z-20 border-b-[3px] border-double border-gray-900 bg-gray-100/90 backdrop-blur-lg dark:border-gray-100 dark:bg-gray-900/90">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-y-2 gap-x-2 px-4 py-4">
           <NavLink to="/" className="flex shrink-0 items-center">
             <Logo markClassName="h-7 w-7" wordmarkClassName="hidden sm:inline" />
@@ -54,7 +54,7 @@ export function Layout() {
               </NavItem>
               <NavItem to="/search">Search</NavItem>
               <NavItem to="/assistant">Assistant</NavItem>
-              <NavItem to="/saved">Saved</NavItem>
+              <NavItem to="/saved">Tracker</NavItem>
               <NavItem to="/cv">CV</NavItem>
               <NavItem to="/interview">Interview</NavItem>
               <NavItem to="/speaking">Speaking</NavItem>
@@ -87,17 +87,14 @@ export function Layout() {
               </AnimatePresence>
             </button>
             {user ? (
-              <button
-                onClick={() => {
-                  logout();
-                  navigate("/");
-                }}
+              <NavLink
+                to="/profile"
                 title={user.email}
-                aria-label={`Log out of ${user.email}`}
+                aria-label={`Profile for ${user.email}`}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-xs font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:scale-105 active:scale-95"
               >
                 {user.email[0].toUpperCase()}
-              </button>
+              </NavLink>
             ) : (
               <NavLink
                 to="/login"
@@ -117,9 +114,7 @@ export function Layout() {
           </PageTransition>
         </AnimatePresence>
       </main>
-      <footer className="border-t border-gray-300 py-6 text-center font-serif text-sm italic text-gray-500 dark:border-gray-800 dark:text-gray-600">
-        JobNeed — AI-powered job search
-      </footer>
+      <Footer />
     </div>
   );
 }

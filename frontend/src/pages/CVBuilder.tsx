@@ -1,17 +1,23 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { tailorCV, TailorCVResponse } from "../api/client";
+import { generateCoverLetter, tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { useAuth } from "../context/AuthContext";
 import { useCV } from "../hooks/useCV";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 const labelClass = "text-xs font-semibold text-gray-500 dark:text-gray-400";
 
 export function CVBuilder() {
+  usePageMeta(
+    "AI CV Builder & Cover Letter Generator",
+    "Build your CV, tailor it to any job description with AI, and generate a matching cover letter in seconds."
+  );
+
   const {
     cv,
     saveStatus,
@@ -30,22 +36,57 @@ export function CVBuilder() {
   const [tailorError, setTailorError] = useState<string | null>(null);
   const [tailorResult, setTailorResult] = useState<TailorCVResponse | null>(null);
 
+  const [companyName, setCompanyName] = useState("");
+  const [letterJobTitle, setLetterJobTitle] = useState("");
+  const [generatingLetter, setGeneratingLetter] = useState(false);
+  const [letterError, setLetterError] = useState<string | null>(null);
+  const [coverLetter, setCoverLetter] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  function backendCV() {
+    return {
+      ...cv,
+      experience: cv.experience.map(({ id: _id, ...rest }) => rest),
+      education: cv.education.map(({ id: _id, ...rest }) => rest),
+    };
+  }
+
   async function handleTailor() {
     if (!jobDescription.trim()) return;
     setTailoring(true);
     setTailorError(null);
     setTailorResult(null);
     try {
-      const backendCV = {
-        ...cv,
-        experience: cv.experience.map(({ id: _id, ...rest }) => rest),
-        education: cv.education.map(({ id: _id, ...rest }) => rest),
-      };
-      setTailorResult(await tailorCV(backendCV, jobDescription));
+      setTailorResult(await tailorCV(backendCV(), jobDescription));
     } catch (e) {
       setTailorError(e instanceof Error ? e.message : "Couldn't tailor your CV right now.");
     } finally {
       setTailoring(false);
+    }
+  }
+
+  async function handleGenerateCoverLetter() {
+    if (!jobDescription.trim()) return;
+    setGeneratingLetter(true);
+    setLetterError(null);
+    setCoverLetter("");
+    try {
+      const res = await generateCoverLetter(backendCV(), jobDescription, companyName, letterJobTitle);
+      setCoverLetter(res.cover_letter);
+    } catch (e) {
+      setLetterError(e instanceof Error ? e.message : "Couldn't generate a cover letter right now.");
+    } finally {
+      setGeneratingLetter(false);
+    }
+  }
+
+  async function handleCopyCoverLetter() {
+    try {
+      await navigator.clipboard.writeText(coverLetter);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // clipboard unavailable — user can still select and copy the text manually
     }
   }
 
@@ -233,6 +274,54 @@ export function CVBuilder() {
                   </button>
                 </div>
                 <p className="text-xs italic text-gray-500 dark:text-gray-400">{tailorResult.notes}</p>
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <h2 className="font-bold text-gray-900 dark:text-gray-50">Cover letter</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Uses the job description above, plus your CV, to draft a letter you can edit and send.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                className={inputClass}
+                placeholder="Company (optional)"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+              <input
+                className={inputClass}
+                placeholder="Role title (optional)"
+                value={letterJobTitle}
+                onChange={(e) => setLetterJobTitle(e.target.value)}
+              />
+            </div>
+            <button
+              onClick={handleGenerateCoverLetter}
+              disabled={generatingLetter || !jobDescription.trim()}
+              className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              title={!jobDescription.trim() ? "Paste a job description above first" : undefined}
+            >
+              {generatingLetter ? "Writing…" : "Generate cover letter"}
+            </button>
+
+            {letterError && <p className="text-sm text-red-600 dark:text-red-400">{letterError}</p>}
+
+            {coverLetter && (
+              <div className="space-y-2">
+                <textarea
+                  className={`${inputClass} leading-relaxed`}
+                  rows={10}
+                  value={coverLetter}
+                  onChange={(e) => setCoverLetter(e.target.value)}
+                />
+                <button
+                  onClick={handleCopyCoverLetter}
+                  className="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                >
+                  {copied ? "Copied ✓" : "Copy to clipboard"}
+                </button>
               </div>
             )}
           </section>

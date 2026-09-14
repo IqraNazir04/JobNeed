@@ -3,12 +3,18 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { usePageMeta } from "../hooks/usePageMeta";
 
 const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 const labelClass = "text-xs font-semibold text-gray-500 dark:text-gray-400";
 
 export function Login() {
+  usePageMeta(
+    "Log In or Sign Up",
+    "Sign in to sync your saved jobs, CV, and application tracker across devices."
+  );
+
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,7 +60,7 @@ export function Login() {
             <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
               Account
             </span>
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-950 dark:text-gray-50">
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-gray-950 dark:text-gray-50">
               {mode === "login" ? "Log in" : "Create an account"}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
