@@ -12,6 +12,7 @@ from app.scrapers.google_jobs import GoogleJobsSource
 from app.scrapers.greenhouse import GreenhouseSource
 from app.scrapers.jobposting_schema import JobPostingSchemaSource
 from app.scrapers.lever import LeverSource
+from app.scrapers.remoteok import RemoteOKSource
 from app.scrapers.sample import SampleSource
 from app.scrapers.url_import import fetch_from_url
 from app.services.ingestion import ingest, ingest_one
@@ -24,6 +25,7 @@ _SOURCES: dict[str, type[JobSource]] = {
     "greenhouse": GreenhouseSource,
     "lever": LeverSource,
     "jobposting_schema": JobPostingSchemaSource,
+    "remoteok": RemoteOKSource,
 }
 
 
@@ -43,8 +45,9 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
 @router.post("/ingest/{source_name}", response_model=list[JobOut])
 def ingest_source(source_name: str, query: str = "", db: Session = Depends(get_db)):
     """Fetch postings from a named source and persist them. `sample` is a
-    local fixture; `greenhouse`, `lever`, and `jobposting_schema` pull live
-    postings with no API key; `google_jobs` requires SERPAPI_API_KEY."""
+    local fixture; `greenhouse`, `lever`, `jobposting_schema`, and `remoteok`
+    pull live postings with no API key; `google_jobs` requires
+    SERPAPI_API_KEY."""
     source_cls = _SOURCES.get(source_name)
     if source_cls is None:
         raise HTTPException(

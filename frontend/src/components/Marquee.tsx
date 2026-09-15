@@ -5,6 +5,7 @@ const ITEMS = [
   "Upwork",
   "Indeed",
   "Google Jobs",
+  "Remote OK",
   "AI-powered search",
   "Built with Claude",
 ];

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 const SOURCE_LABEL_OVERRIDES: Record<string, string> = {
   linkedin: "LinkedIn",
   jobposting_schema: "Company Sites",
+  remoteok: "Remote OK",
 };
 
 function formatSourceLabel(source: string): string {

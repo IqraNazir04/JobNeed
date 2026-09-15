@@ -44,6 +44,24 @@ def test_ingest_unconfigured_source_returns_400(client):
     assert res.status_code == 400
 
 
+def test_ingest_remoteok_persists_jobs(client):
+    fake_job = {
+        "id": "remoteok-1",
+        "source": "remoteok",
+        "title": "Backend Engineer",
+        "company": "Acme Remote",
+        "location": "Remote",
+        "description": "Ship things.",
+        "url": "https://remoteok.com/remote-jobs/1",
+    }
+    from app.scrapers.base import RawJob
+
+    with patch("app.scrapers.remoteok.RemoteOKSource.fetch", return_value=[RawJob(**fake_job)]):
+        res = client.post("/api/jobs/ingest/remoteok")
+    assert res.status_code == 200
+    assert res.json()[0]["id"] == "remoteok-1"
+
+
 def test_import_url_requires_auth(client):
     res = client.post("/api/jobs/import-url", json={"url": "https://example.com/x"})
     assert res.status_code == 401

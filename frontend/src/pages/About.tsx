@@ -11,7 +11,7 @@ import { Slide, Slider } from "../components/Slider";
 import { usePageMeta } from "../hooks/usePageMeta";
 
 const COMPARISON: ComparisonRow[] = [
-  { feature: "Job sources searched at once", without: "1", withUs: "6" },
+  { feature: "Job sources searched at once", without: "1", withUs: "7" },
   { feature: "CV tailored to the job description", without: false, withUs: true },
   { feature: "Interview questions from the real posting", without: false, withUs: true },
   { feature: "Feedback on spoken English", without: false, withUs: true },
@@ -69,7 +69,7 @@ const SLIDES: Slide[] = [
     kicker: "Search",
     title: "AI-powered search",
     description:
-      "JobNeed indexes postings from Greenhouse, Lever, LinkedIn, Upwork, Indeed, and Google Jobs, then ranks them by real fit using retrieval-augmented search — not just keyword matching.",
+      "JobNeed indexes postings from Greenhouse, Lever, LinkedIn, Upwork, Indeed, Google Jobs, and Remote OK, then ranks them by real fit using retrieval-augmented search — not just keyword matching.",
     icon: (
       <svg {...iconProps}>
         <circle cx="11" cy="11" r="7" />
@@ -116,7 +116,7 @@ const SLIDES: Slide[] = [
 ];
 
 const STATS = [
-  { value: "6", label: "Job sources indexed" },
+  { value: "7", label: "Job sources indexed" },
   { value: "4", label: "AI-powered tools" },
   { value: "100%", label: "Built on Claude" },
 ];
@@ -124,7 +124,7 @@ const STATS = [
 export function About() {
   usePageMeta(
     "AI-Powered Job Search & Career Platform",
-    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, and Google Jobs in one place. Tailor your CV, write cover letters, prep for interviews, and practice your spoken English — all powered by AI."
+    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, Google Jobs, and Remote OK in one place. Tailor your CV, write cover letters, prep for interviews, and practice your spoken English — all powered by AI."
   );
 
   return (
