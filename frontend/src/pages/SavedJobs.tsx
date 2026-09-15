@@ -5,7 +5,7 @@ import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../context/AuthContext";
 import { useJobModal } from "../context/JobModalContext";
-import { useSavedJobs } from "../hooks/useSavedJobs";
+import { useSavedJobs } from "../context/SavedJobsContext";
 
 const COLUMNS: { key: ApplicationStatus; label: string; dot: string }[] = [
   { key: "saved", label: "Saved", dot: "bg-gray-400 dark:bg-gray-600" },

@@ -289,7 +289,7 @@ function ProfilePanel() {
 
       <button
         onClick={logout}
-        className="text-sm font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+        className="rounded-xl bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-500/10 dark:hover:text-red-400"
       >
         Log out
       </button>

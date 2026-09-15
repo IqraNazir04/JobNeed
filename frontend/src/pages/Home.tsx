@@ -10,7 +10,7 @@ import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { SearchBar } from "../components/SearchBar";
 import { SourceFilter } from "../components/SourceFilter";
 import { useAuth } from "../context/AuthContext";
-import { useSavedJobs } from "../hooks/useSavedJobs";
+import { useSavedJobs } from "../context/SavedJobsContext";
 
 const FEATURE_LINKS = [
   {

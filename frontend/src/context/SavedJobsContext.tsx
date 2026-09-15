@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import {
   ApplicationStatus,
   getSavedJobsRemote,
@@ -7,8 +7,8 @@ import {
   updateSavedJobStatusRemote,
   type Job,
 } from "../api/client";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
+import { useAuth } from "./AuthContext";
+import { useToast } from "./ToastContext";
 
 const STORAGE_KEY = "jobneed:saved-jobs";
 
@@ -40,7 +40,25 @@ function writeLocal(saved: Record<string, SavedEntry>) {
   }
 }
 
-export function useSavedJobs() {
+type SavedJobsState = {
+  savedJobs: SavedEntry[];
+  isSaved: (id: string) => boolean;
+  toggleSaved: (job: Job) => void;
+  updateStatus: (jobId: string, status: ApplicationStatus) => void;
+};
+
+const SavedJobsContext = createContext<SavedJobsState | null>(null);
+
+/**
+ * Every section of the one-page app (search results, the tracker, the job
+ * modal, the assistant) needs to read and write the same saved-jobs set.
+ * This used to be a plain hook, which worked when only one page was mounted
+ * at a time; now that every section mounts simultaneously, each call would
+ * otherwise get its own disconnected copy of the state - saving a job from
+ * search would never show up in the tracker without a full reload. A single
+ * provider fixes that by giving every consumer the same state.
+ */
+export function SavedJobsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [saved, setSaved] = useState<Record<string, SavedEntry>>(() => (user ? {} : readLocal()));
@@ -94,10 +112,17 @@ export function useSavedJobs() {
     [user]
   );
 
-  return {
-    savedJobs: Object.values(saved).sort((a, b) => a.job.title.localeCompare(b.job.title)),
-    isSaved,
-    toggleSaved,
-    updateStatus,
-  };
+  const savedJobs = Object.values(saved).sort((a, b) => a.job.title.localeCompare(b.job.title));
+
+  return (
+    <SavedJobsContext.Provider value={{ savedJobs, isSaved, toggleSaved, updateStatus }}>
+      {children}
+    </SavedJobsContext.Provider>
+  );
+}
+
+export function useSavedJobs() {
+  const ctx = useContext(SavedJobsContext);
+  if (!ctx) throw new Error("useSavedJobs must be used within a SavedJobsProvider");
+  return ctx;
 }

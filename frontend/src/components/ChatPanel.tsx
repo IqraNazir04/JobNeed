@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { chat, Job } from "../api/client";
-import { useSavedJobs } from "../hooks/useSavedJobs";
+import { useSavedJobs } from "../context/SavedJobsContext";
 import { JobCard } from "./JobCard";
 import { SearchBar } from "./SearchBar";
 

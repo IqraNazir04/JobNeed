@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { Job } from "../api/client";
-import { useSavedJobs } from "../hooks/useSavedJobs";
+import { useSavedJobs } from "../context/SavedJobsContext";
 import { ConfettiBurst } from "./ConfettiBurst";
 
 export function JobDetailModal({
