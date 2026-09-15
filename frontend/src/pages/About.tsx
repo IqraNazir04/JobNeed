@@ -113,9 +113,37 @@ const SLIDES: Slide[] = [
 ];
 
 const STATS = [
-  { value: "9", label: "Job sources indexed" },
-  { value: "4", label: "AI-powered tools" },
-  { value: "100%", label: "Built on Claude" },
+  {
+    value: "9",
+    label: "Job sources indexed",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 2 2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
+    value: "4",
+    label: "AI-powered tools",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    ),
+  },
+  {
+    value: "100%",
+    label: "Built on Claude",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+    ),
+  },
 ];
 
 export function About() {
@@ -158,22 +186,30 @@ export function About() {
 
       <GradientMesh>
         <div className="p-6 sm:p-10">
-          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-            By the numbers
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="h-px w-8 bg-gradient-to-r from-sky-400 to-yellow-300" />
+            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
+              By the numbers
+            </span>
+          </div>
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="show"
-            className="mt-4 grid grid-cols-3 gap-3 sm:gap-4"
+            className="mt-5 grid grid-cols-3 gap-3 sm:gap-4"
           >
             {STATS.map((s) => (
               <motion.div
                 key={s.label}
                 variants={staggerItem}
-                className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center shadow-lg shadow-black/10 backdrop-blur-xl sm:p-6"
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center shadow-lg shadow-black/20 backdrop-blur-xl transition-colors hover:border-white/20 hover:bg-white/[0.07] sm:p-6"
               >
-                <div className="font-heading text-3xl font-bold text-white sm:text-4xl">{s.value}</div>
+                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-sky-300 sm:h-10 sm:w-10">
+                  {s.icon}
+                </div>
+                <div className="mt-3 bg-gradient-to-br from-sky-300 to-yellow-200 bg-clip-text font-heading text-3xl font-bold text-transparent sm:text-4xl">
+                  {s.value}
+                </div>
                 <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-white/70">
                   {s.label}
                 </div>
