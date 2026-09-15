@@ -50,12 +50,12 @@ export function Slider({ slides }: { slides: Slide[] }) {
             className="absolute inset-0 flex items-center gap-5 px-11 sm:px-14"
           >
             {slide.icon && (
-              <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25 sm:flex">
+              <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-600 to-yellow-600 text-white shadow-md shadow-sky-600/25 sm:flex">
                 {slide.icon}
               </div>
             )}
             <div>
-              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
                 {slide.kicker}
               </span>
               <h3 className="mt-2 font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
@@ -96,7 +96,7 @@ export function Slider({ slides }: { slides: Slide[] }) {
             aria-label={`Go to slide ${i + 1}`}
             aria-current={i === index}
             className={`h-1.5 rounded-full transition-all ${
-              i === index ? "w-6 bg-indigo-600 dark:bg-indigo-400" : "w-1.5 bg-gray-300 dark:bg-gray-700"
+              i === index ? "w-6 bg-sky-600 dark:bg-sky-400" : "w-1.5 bg-gray-300 dark:bg-gray-700"
             }`}
           />
         ))}

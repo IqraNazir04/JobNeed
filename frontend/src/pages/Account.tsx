@@ -1,24 +1,132 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FormEvent, useEffect, useState } from "react";
 import { getGithubStats, GithubStats, updateProfile } from "../api/client";
 import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { usePageMeta } from "../hooks/usePageMeta";
 
 const inputClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 const labelClass = "text-xs font-semibold text-gray-500 dark:text-gray-400";
 
-export function Profile() {
-  usePageMeta(
-    "Your Profile",
-    "Connect your LinkedIn, Indeed, Upwork, and GitHub profiles to personalize your job search."
-  );
-
-  const { user, loading, logout, setUser } = useAuth();
+function LoginForm() {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { login, register } = useAuth();
   const { showToast } = useToast();
-  const navigate = useNavigate();
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      if (mode === "login") await login(email, password);
+      else await register(email, password);
+      showToast(mode === "login" ? "Welcome back!" : "Account created");
+    } catch (err) {
+      if (mode === "login") {
+        setError("Couldn't log in — check your email and password.");
+      } else if (err instanceof Error && err.message.includes("400")) {
+        setError("That email is already registered.");
+      } else if (err instanceof Error && err.message.includes("422")) {
+        setError("Password must be at least 8 characters.");
+      } else {
+        setError("Couldn't create your account right now.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="grid overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm shadow-gray-900/[0.03] dark:border-gray-800 dark:bg-gray-900 dark:shadow-none md:grid-cols-2">
+      <img
+        src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=800&q=80"
+        alt=""
+        className="hidden h-full w-full object-cover md:block"
+      />
+
+      <div className="p-8">
+        <header className="space-y-1">
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50">
+            {mode === "login" ? "Log in" : "Create an account"}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {mode === "login"
+              ? "Sync your saved jobs and CV across devices."
+              : "Save your jobs and CV to your account, not just this device."}
+          </p>
+        </header>
+
+        <form onSubmit={handleSubmit} className="mt-5 space-y-3">
+          <div className="space-y-1">
+            <label className={labelClass}>Email</label>
+            <input
+              type="email"
+              required
+              className={inputClass}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className={labelClass}>Password</label>
+            <input
+              type="password"
+              required
+              minLength={mode === "signup" ? 8 : undefined}
+              className={inputClass}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {mode === "signup" && (
+              <p className="text-xs text-gray-400 dark:text-gray-500">At least 8 characters.</p>
+            )}
+          </div>
+
+          {error && (
+            <motion.p
+              initial={{ x: 0 }}
+              animate={{ x: [0, -6, 6, -4, 4, 0] }}
+              transition={{ duration: 0.35 }}
+              className="text-sm text-red-600 dark:text-red-400"
+            >
+              {error}
+            </motion.p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button
+            onClick={() => {
+              setMode(mode === "login" ? "signup" : "login");
+              setError(null);
+            }}
+            className="font-semibold text-sky-600 hover:underline dark:text-sky-400"
+          >
+            {mode === "login" ? "Sign up" : "Log in"}
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ProfilePanel() {
+  const { user, logout, setUser } = useAuth();
+  const { showToast } = useToast();
 
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [indeedUrl, setIndeedUrl] = useState("");
@@ -31,9 +139,6 @@ export function Profile() {
   const [githubError, setGithubError] = useState<string | null>(null);
   const [loadingGithub, setLoadingGithub] = useState(false);
 
-  // Sync the form from the account whenever it (re)loads — including the
-  // first render after a page refresh, when `user` starts null until the
-  // token is validated, and again right after a successful save.
   useEffect(() => {
     if (!user) return;
     setLinkedinUrl(user.linkedin_url);
@@ -43,10 +148,6 @@ export function Profile() {
   }, [user]);
 
   useEffect(() => {
-    if (!loading && !user) navigate("/login");
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
     if (!user?.github_username) return;
     setLoadingGithub(true);
     getGithubStats(user.github_username)
@@ -54,6 +155,8 @@ export function Profile() {
       .catch(() => setGithubError("Couldn't load GitHub data for this username."))
       .finally(() => setLoadingGithub(false));
   }, [user?.github_username]);
+
+  if (!user) return null;
 
   async function handleSave() {
     setSaving(true);
@@ -74,17 +177,8 @@ export function Profile() {
     }
   }
 
-  if (!user) return null;
-
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <PageHeader
-        kicker="Profile"
-        title="Manage your"
-        emphasis="account."
-        subtitle="Connect your other profiles so JobNeed can write sharper cover letters and personalize your search around your real skills."
-      />
-
+    <div className="space-y-6">
       <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h2 className="font-bold text-gray-900 dark:text-gray-50">Account</h2>
         <div>
@@ -144,7 +238,7 @@ export function Profile() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save profile"}
         </button>
@@ -180,7 +274,7 @@ export function Profile() {
                     {githubStats.top_languages.map((lang) => (
                       <span
                         key={lang}
-                        className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300"
+                        className="rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-600 dark:bg-sky-500/10 dark:text-sky-300"
                       >
                         {lang}
                       </span>
@@ -194,14 +288,31 @@ export function Profile() {
       )}
 
       <button
-        onClick={() => {
-          logout();
-          navigate("/");
-        }}
+        onClick={logout}
         className="text-sm font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
       >
         Log out
       </button>
+    </div>
+  );
+}
+
+export function Account() {
+  const { user, loading } = useAuth();
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        kicker="Account"
+        title={user ? "Manage your" : "Your"}
+        emphasis={user ? "account." : "account."}
+        subtitle={
+          user
+            ? "Connect your other profiles so JobNeed can write sharper cover letters and personalize your search around your real skills."
+            : "Log in to sync your saved jobs, CV, and application tracker across devices."
+        }
+      />
+      {loading ? null : user ? <ProfilePanel /> : <LoginForm />}
     </div>
   );
 }

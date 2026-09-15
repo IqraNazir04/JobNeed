@@ -48,7 +48,7 @@ export function ChatPanel() {
             onClick={() => handleAsk(prompt)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
               lastPrompt === prompt
-                ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/25"
+                ? "bg-gradient-to-br from-sky-600 to-yellow-600 text-white shadow-sm shadow-sky-600/25"
                 : "border border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600"
             }`}
           >

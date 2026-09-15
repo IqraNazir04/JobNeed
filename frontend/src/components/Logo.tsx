@@ -21,10 +21,10 @@ export function Logo({
 }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <LogoMark className={`h-6 w-6 shrink-0 text-indigo-600 dark:text-indigo-400 ${markClassName}`} />
+      <LogoMark className={`h-6 w-6 shrink-0 text-sky-600 dark:text-sky-400 ${markClassName}`} />
       <span className={`font-sans text-xl font-extrabold tracking-tight ${wordmarkClassName}`}>
         <span className="text-gray-950 dark:text-gray-50">Job</span>
-        <span className="text-indigo-600 dark:text-indigo-400">Need</span>
+        <span className="text-sky-600 dark:text-sky-400">Need</span>
       </span>
     </span>
   );

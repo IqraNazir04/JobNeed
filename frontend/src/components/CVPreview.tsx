@@ -5,7 +5,7 @@ export function CVPreview({ cv }: { cv: CVFormData }) {
 
   return (
     <div id="cv-print-area" className="rounded-2xl border border-gray-200 bg-white p-8 text-gray-900 shadow-sm shadow-gray-900/[0.03] dark:border-gray-800 print:rounded-none print:border-none print:p-0 print:shadow-none">
-      <h1 className="text-2xl font-extrabold tracking-tight">{cv.name || "Your Name"}</h1>
+      <h2 className="text-2xl font-extrabold tracking-tight">{cv.name || "Your Name"}</h2>
       {hasContactLine && (
         <p className="mt-1 text-sm text-gray-600">
           {[cv.email, cv.phone, cv.location, cv.links].filter(Boolean).join(" · ")}

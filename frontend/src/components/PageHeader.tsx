@@ -7,13 +7,17 @@ export function PageHeader({
   emphasis,
   subtitle,
   action,
+  level = "h2",
 }: {
   kicker: string;
   title: string;
   emphasis?: string;
   subtitle?: ReactNode;
   action?: ReactNode;
+  /** Each JobNeed section renders one of these; only the hero section should use "h1" so the page keeps a single, valid heading outline. */
+  level?: "h1" | "h2";
 }) {
+  const Heading = motion[level];
   return (
     <header className="space-y-4">
       <motion.div
@@ -22,13 +26,13 @@ export function PageHeader({
         transition={{ duration: 0.3 }}
         className="flex items-center gap-3"
       >
-        <span className="whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+        <span className="whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
           {kicker}
         </span>
         <span className="h-px flex-1 bg-gray-300 dark:bg-gray-700" />
       </motion.div>
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <motion.h1
+        <Heading
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.05 }}
@@ -38,10 +42,10 @@ export function PageHeader({
           {emphasis && (
             <>
               {" "}
-              <span className="text-indigo-600 dark:text-indigo-400">{emphasis}</span>
+              <span className="text-sky-600 dark:text-sky-400">{emphasis}</span>
             </>
           )}
-        </motion.h1>
+        </Heading>
         {action}
       </div>
       {subtitle && (

@@ -1,24 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { generateCoverLetter, tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { useAuth } from "../context/AuthContext";
 import { useCV } from "../hooks/useCV";
-import { usePageMeta } from "../hooks/usePageMeta";
 
 const inputClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 const labelClass = "text-xs font-semibold text-gray-500 dark:text-gray-400";
 
 export function CVBuilder() {
-  usePageMeta(
-    "AI CV Builder & Cover Letter Generator",
-    "Build your CV, tailor it to any job description with AI, and generate a matching cover letter in seconds."
-  );
-
   const {
     cv,
     saveStatus,
@@ -122,7 +115,7 @@ export function CVBuilder() {
                 </AnimatePresence>
                 <button
                   onClick={() => window.print()}
-                  className="whitespace-nowrap rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
+                  className="whitespace-nowrap rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
                 >
                   Print / Save as PDF
                 </button>
@@ -170,7 +163,7 @@ export function CVBuilder() {
           <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-gray-900 dark:text-gray-50">Experience</h2>
-              <button onClick={addExperience} className="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+              <button onClick={addExperience} className="text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400">
                 + Add role
               </button>
             </div>
@@ -198,7 +191,7 @@ export function CVBuilder() {
           <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-gray-900 dark:text-gray-50">Education</h2>
-              <button onClick={addEducation} className="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+              <button onClick={addEducation} className="text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400">
                 + Add school
               </button>
             </div>
@@ -244,15 +237,15 @@ export function CVBuilder() {
               onClick={handleTailor}
               disabled={tailoring || !jobDescription.trim() || !user}
               title={!user ? "Log in to use AI tailoring" : undefined}
-              className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {tailoring ? "Tailoring…" : "Tailor with AI"}
             </button>
             {!user && (
               <p className="text-xs text-gray-400 dark:text-gray-500">
-                <Link to="/login" className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+                <a href="#account" className="font-semibold text-sky-600 hover:underline dark:text-sky-400">
                   Log in
-                </Link>{" "}
+                </a>{" "}
                 to use AI tailoring.
               </p>
             )}
@@ -266,7 +259,7 @@ export function CVBuilder() {
                   <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">{tailorResult.tailored_summary}</p>
                   <button
                     onClick={() => update({ summary: tailorResult.tailored_summary })}
-                    className="mt-1.5 text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="mt-1.5 text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
                   >
                     Apply to CV
                   </button>
@@ -278,7 +271,7 @@ export function CVBuilder() {
                   </p>
                   <button
                     onClick={() => update({ skills: tailorResult.emphasized_skills })}
-                    className="mt-1.5 text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="mt-1.5 text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
                   >
                     Apply to CV
                   </button>
@@ -310,16 +303,16 @@ export function CVBuilder() {
             <button
               onClick={handleGenerateCoverLetter}
               disabled={generatingLetter || !jobDescription.trim() || !user}
-              className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               title={!user ? "Log in to generate a cover letter" : !jobDescription.trim() ? "Paste a job description above first" : undefined}
             >
               {generatingLetter ? "Writing…" : "Generate cover letter"}
             </button>
             {!user && (
               <p className="text-xs text-gray-400 dark:text-gray-500">
-                <Link to="/login" className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+                <a href="#account" className="font-semibold text-sky-600 hover:underline dark:text-sky-400">
                   Log in
-                </Link>{" "}
+                </a>{" "}
                 to generate a cover letter.
               </p>
             )}
@@ -336,7 +329,7 @@ export function CVBuilder() {
                 />
                 <button
                   onClick={handleCopyCoverLetter}
-                  className="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                  className="text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
                 >
                   {copied ? "Copied ✓" : "Copy to clipboard"}
                 </button>

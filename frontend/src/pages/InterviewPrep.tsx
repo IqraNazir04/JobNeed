@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
 import { getMyCV, InterviewPrepResponse, prepareInterview } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
 import { MotivationalQuote } from "../components/MotivationalQuote";
@@ -9,24 +8,23 @@ import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { SearchBar } from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
-import { usePageMeta } from "../hooks/usePageMeta";
 
 const CATEGORY_CLASS: Record<string, string> = {
-  Behavioral: "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300",
+  Behavioral: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-300",
   Technical: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
   "Role-specific": "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
 };
 
 const inputClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 
-export function InterviewPrep() {
-  usePageMeta(
-    "Interview Preparation",
-    "Get AI-generated interview questions and talking points tailored to a specific job posting."
-  );
-
-  const [searchParams] = useSearchParams();
+export function InterviewPrep({
+  prefillJobId,
+  onAskSpeaking,
+}: {
+  prefillJobId?: string | null;
+  onAskSpeaking: (question: string) => void;
+}) {
   const { user } = useAuth();
 
   const [jobDescription, setJobDescription] = useState("");
@@ -53,11 +51,10 @@ export function InterviewPrep() {
   }
 
   useEffect(() => {
-    const jobId = searchParams.get("job_id");
-    if (jobId) runPrepare({ job_id: jobId });
-    // Only react to the initial deep link, not every keystroke elsewhere on the page.
+    if (prefillJobId) runPrepare({ job_id: prefillJobId });
+    // Only react when a job is handed off from the search results, not every keystroke elsewhere on the page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [prefillJobId]);
 
   return (
     <div className="space-y-6">
@@ -104,7 +101,7 @@ export function InterviewPrep() {
         <button
           onClick={() => runPrepare({ job_description: jobDescription })}
           disabled={!jobDescription.trim() || loading}
-          className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Prepare
         </button>
@@ -151,12 +148,12 @@ export function InterviewPrep() {
                     <li key={j}>{tp}</li>
                   ))}
                 </ul>
-                <Link
-                  to={`/speaking?q=${encodeURIComponent(q.question)}`}
-                  className="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                <button
+                  onClick={() => onAskSpeaking(q.question)}
+                  className="mt-2 inline-block text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
                 >
                   Practice answering this out loud →
-                </Link>
+                </button>
               </motion.div>
             ))}
           </div>

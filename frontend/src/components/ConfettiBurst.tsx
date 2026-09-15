@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 
-const COLORS = ["#4F46E5", "#7C3AED", "#EC4899", "#F59E0B", "#10B981", "#06B6D4"];
+const COLORS = ["#0EA5E9", "#FACC15", "#111827", "#F59E0B", "#0284C7", "#EAB308"];
 
 function makeParticles() {
   return Array.from({ length: 18 }, (_, i) => {

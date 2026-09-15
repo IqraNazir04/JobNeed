@@ -1,19 +1,15 @@
-import { Link } from "react-router-dom";
 import { Logo } from "./Logo";
 
 const FEATURE_LINKS = [
-  { to: "/search", label: "Job Search" },
-  { to: "/assistant", label: "AI Assistant" },
-  { to: "/cv", label: "CV Builder" },
-  { to: "/interview", label: "Interview Prep" },
-  { to: "/speaking", label: "Speaking Practice" },
-  { to: "/saved", label: "Application Tracker" },
+  { to: "#search", label: "Job Search" },
+  { to: "#assistant", label: "AI Assistant" },
+  { to: "#cv", label: "CV Builder" },
+  { to: "#interview", label: "Interview Prep" },
+  { to: "#speaking", label: "Speaking Practice" },
+  { to: "#tracker", label: "Application Tracker" },
 ];
 
-const ACCOUNT_LINKS = [
-  { to: "/profile", label: "Profile" },
-  { to: "/login", label: "Log in" },
-];
+const ACCOUNT_LINKS = [{ to: "#account", label: "Account" }];
 
 export function Footer() {
   return (
@@ -34,12 +30,12 @@ export function Footer() {
           <ul className="mt-3 space-y-2">
             {FEATURE_LINKS.map((link) => (
               <li key={link.to}>
-                <Link
-                  to={link.to}
-                  className="text-sm text-gray-600 transition-colors hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+                <a
+                  href={link.to}
+                  className="text-sm text-gray-600 transition-colors hover:text-sky-600 dark:text-gray-400 dark:hover:text-sky-400"
                 >
                   {link.label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -52,12 +48,12 @@ export function Footer() {
           <ul className="mt-3 space-y-2">
             {ACCOUNT_LINKS.map((link) => (
               <li key={link.to}>
-                <Link
-                  to={link.to}
-                  className="text-sm text-gray-600 transition-colors hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+                <a
+                  href={link.to}
+                  className="text-sm text-gray-600 transition-colors hover:text-sky-600 dark:text-gray-400 dark:hover:text-sky-400"
                 >
                   {link.label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>

@@ -1,37 +1,32 @@
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { ApplicationStatus } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { RotatingBadge } from "../components/RotatingBadge";
 import { useAuth } from "../context/AuthContext";
-import { usePageMeta } from "../hooks/usePageMeta";
+import { useJobModal } from "../context/JobModalContext";
 import { useSavedJobs } from "../hooks/useSavedJobs";
 
 const COLUMNS: { key: ApplicationStatus; label: string; dot: string }[] = [
   { key: "saved", label: "Saved", dot: "bg-gray-400 dark:bg-gray-600" },
-  { key: "applied", label: "Applied", dot: "bg-indigo-500" },
+  { key: "applied", label: "Applied", dot: "bg-sky-500" },
   { key: "interviewing", label: "Interviewing", dot: "bg-amber-500" },
   { key: "offer", label: "Offer", dot: "bg-emerald-500" },
   { key: "rejected", label: "Rejected", dot: "bg-gray-300 dark:bg-gray-700" },
 ];
 
 const selectClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300";
+  "w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 outline-none focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300";
 
 export function SavedJobs() {
-  usePageMeta(
-    "Application Tracker",
-    "Track every job application from saved to offer in one visual pipeline."
-  );
-
   const { savedJobs, toggleSaved, updateStatus } = useSavedJobs();
   const { user } = useAuth();
+  const { openJob } = useJobModal();
 
   return (
     <div className="relative isolate space-y-6">
-      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
+      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <PageHeader
@@ -95,12 +90,13 @@ export function SavedJobs() {
                           className="space-y-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm shadow-gray-900/[0.03] dark:border-gray-800 dark:bg-gray-950"
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <Link
-                              to={`/jobs/${job.id}`}
-                              className="font-heading text-sm font-bold leading-snug text-gray-950 hover:text-indigo-600 dark:text-gray-50 dark:hover:text-indigo-400"
+                            <button
+                              type="button"
+                              onClick={() => openJob(job)}
+                              className="text-left font-heading text-sm font-bold leading-snug text-gray-950 hover:text-sky-600 dark:text-gray-50 dark:hover:text-sky-400"
                             >
                               {job.title}
-                            </Link>
+                            </button>
                             <button
                               onClick={() => toggleSaved(job)}
                               aria-label="Remove from tracker"

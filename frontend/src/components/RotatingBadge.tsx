@@ -21,8 +21,8 @@ export function RotatingBadge({
         <defs>
           <path id="badge-ring" d="M 50,50 m -40,0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" />
           <linearGradient id="badge-gradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#4F46E5" />
-            <stop offset="100%" stopColor="#7C3AED" />
+            <stop offset="0%" stopColor="#0EA5E9" />
+            <stop offset="100%" stopColor="#FACC15" />
           </linearGradient>
         </defs>
         <text

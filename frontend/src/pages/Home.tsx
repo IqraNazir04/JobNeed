@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { getGithubStats, getMyCV, search, SearchResult } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
 import { JobCard } from "../components/JobCard";
@@ -12,27 +11,26 @@ import { RotatingBadge } from "../components/RotatingBadge";
 import { SearchBar } from "../components/SearchBar";
 import { SourceFilter } from "../components/SourceFilter";
 import { useAuth } from "../context/AuthContext";
-import { usePageMeta } from "../hooks/usePageMeta";
 import { useSavedJobs } from "../hooks/useSavedJobs";
 
 const FEATURE_LINKS = [
   {
-    to: "/assistant",
+    to: "#assistant",
     label: "Ask the AI Assistant",
-    className: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20",
+    className: "bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/20",
   },
   {
-    to: "/cv",
+    to: "#cv",
     label: "Tailor your CV",
-    className: "bg-violet-50 text-violet-700 hover:bg-violet-100 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20",
+    className: "bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-500/10 dark:text-yellow-300 dark:hover:bg-yellow-500/20",
   },
   {
-    to: "/interview",
+    to: "#interview",
     label: "Prepare for interviews",
     className: "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20",
   },
   {
-    to: "/speaking",
+    to: "#speaking",
     label: "Practice speaking",
     className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20",
   },
@@ -52,11 +50,6 @@ const KNOWN_SOURCES = [
 type Status = "idle" | "loading" | "error" | "done";
 
 export function Home() {
-  usePageMeta(
-    "Search Jobs Across Every Major Board",
-    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, Google Jobs, Remote OK, Ashby, and Jobicy at once, ranked by AI to match what you're actually looking for."
-  );
-
   const [results, setResults] = useState<SearchResult[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [lastQuery, setLastQuery] = useState("");
@@ -132,7 +125,7 @@ export function Home() {
 
   return (
     <div className="relative isolate space-y-7">
-      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
+      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <PageHeader
@@ -162,7 +155,7 @@ export function Home() {
             type="checkbox"
             checked={personalize}
             onChange={(e) => setPersonalize(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500/40 dark:border-gray-700 dark:bg-gray-900"
+            className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900"
           />
           Personalize with my profile
           {personalize && loadingProfile && <span className="text-xs text-gray-400">loading…</span>}
@@ -191,7 +184,7 @@ export function Home() {
             aria-pressed={remoteOnly}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
               remoteOnly
-                ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/25"
+                ? "bg-gradient-to-br from-sky-600 to-yellow-600 text-white shadow-sm shadow-sky-600/25"
                 : "border border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600"
             }`}
           >
@@ -249,11 +242,11 @@ export function Home() {
       )}
 
       <div className="space-y-3">
-        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
           Beyond search
         </span>
         <h2 className="max-w-lg font-heading text-3xl font-bold leading-[1.1] text-gray-950 dark:text-gray-50 sm:text-4xl">
-          The search is just the <span className="text-indigo-600 dark:text-indigo-400">start.</span>
+          The search is just the <span className="text-sky-600 dark:text-sky-400">start.</span>
         </h2>
         <p className="max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
           Once you've found a role worth applying to, JobNeed helps you tailor your CV, prep for the
@@ -261,13 +254,13 @@ export function Home() {
         </p>
         <div className="flex flex-wrap gap-2.5 pt-1">
           {FEATURE_LINKS.map((f) => (
-            <Link
+            <a
               key={f.to}
-              to={f.to}
+              href={f.to}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${f.className}`}
             >
               {f.label}
-            </Link>
+            </a>
           ))}
         </div>
       </div>

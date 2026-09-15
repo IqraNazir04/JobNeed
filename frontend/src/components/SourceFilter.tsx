@@ -48,7 +48,7 @@ export function SourceFilter({
               <motion.span
                 layoutId="active-source-pill"
                 transition={{ type: "spring", stiffness: 500, damping: 32 }}
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 shadow-sm shadow-indigo-600/25"
+                className="absolute inset-0 rounded-full bg-gradient-to-br from-sky-600 to-yellow-600 shadow-sm shadow-sky-600/25"
               />
             )}
             {!isActive && (

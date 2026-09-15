@@ -29,14 +29,14 @@ export function MotivationalQuote({ className = "" }: { className?: string }) {
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
-        className="text-indigo-300 dark:text-indigo-500/40"
+        className="text-sky-300 dark:text-sky-500/40"
       >
         <path d="M9.5 7C7 7 5 9 5 11.5S7 16 9.5 16c0 2-1.5 3.5-3.5 3.5v1.5c3.5 0 6-2.5 6-6V11c0-2.2-1.8-4-4-4h1.5zM18 7c-2.5 0-4.5 2-4.5 4.5S15.5 16 18 16c0 2-1.5 3.5-3.5 3.5v1.5c3.5 0 6-2.5 6-6V11c0-2.2-1.8-4-4-4H18z" />
       </svg>
       <p className="mt-2 font-heading text-base font-semibold leading-snug text-gray-800 dark:text-gray-200">
         {quote.text}
       </p>
-      <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-indigo-600 dark:text-indigo-400">
+      <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-sky-600 dark:text-sky-400">
         — {quote.author}
       </p>
     </div>

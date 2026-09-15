@@ -1,14 +1,11 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { ComparisonRow, FeatureComparison } from "../components/FeatureComparison";
 import { GradientMesh } from "../components/GradientMesh";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { PhotoScroller, ScrollerPhoto } from "../components/PhotoScroller";
-import { RotatingBadge } from "../components/RotatingBadge";
 import { Slide, Slider } from "../components/Slider";
-import { usePageMeta } from "../hooks/usePageMeta";
 
 const COMPARISON: ComparisonRow[] = [
   { feature: "Job sources searched at once", without: "1", withUs: "9" },
@@ -122,15 +119,10 @@ const STATS = [
 ];
 
 export function About() {
-  usePageMeta(
-    "AI-Powered Job Search & Career Platform",
-    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, Google Jobs, Remote OK, Ashby, and Jobicy in one place. Tailor your CV, write cover letters, prep for interviews, and practice your spoken English — all powered by AI."
-  );
-
   return (
     <div className="relative isolate space-y-10">
-      <div className="pointer-events-none absolute -left-24 -top-10 -z-10 h-80 w-80 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
-      <div className="pointer-events-none absolute -right-16 top-64 -z-10 h-72 w-72 rounded-full bg-gradient-to-br from-violet-400 to-indigo-400 opacity-[0.1] blur-3xl dark:opacity-[0.18]" />
+      <div className="pointer-events-none absolute -left-24 -top-10 -z-10 h-80 w-80 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
+      <div className="pointer-events-none absolute -right-16 top-64 -z-10 h-72 w-72 rounded-full bg-gradient-to-br from-yellow-400 to-sky-400 opacity-[0.1] blur-3xl dark:opacity-[0.18]" />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <PageHeader
@@ -138,6 +130,7 @@ export function About() {
           title="Built for the modern"
           emphasis="job search."
           subtitle="JobNeed is a single place to search, prepare, and apply — with AI doing the tedious parts so you can focus on the roles that actually fit."
+          level="h1"
         />
         <div className="relative hidden shrink-0 sm:block">
           <motion.img
@@ -148,7 +141,6 @@ export function About() {
             alt="A person reviewing notes at a desk"
             className="h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 lg:h-40 lg:w-80"
           />
-          <RotatingBadge text="OUR MISSION · ONE PLACE · EVERY STEP · " className="absolute -bottom-6 -left-6 hidden lg:block" />
         </div>
       </div>
 
@@ -192,11 +184,11 @@ export function About() {
       </GradientMesh>
 
       <div className="space-y-3">
-        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
           Why JobNeed
         </span>
         <h2 className="font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
-          Compare it to <span className="text-indigo-600 dark:text-indigo-400">doing it yourself.</span>
+          Compare it to <span className="text-sky-600 dark:text-sky-400">doing it yourself.</span>
         </h2>
         <FeatureComparison rows={COMPARISON} />
       </div>
@@ -204,34 +196,34 @@ export function About() {
       <div className="relative isolate space-y-3">
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-4 -top-16 -z-10 h-16 w-16 text-indigo-500/70 dark:text-indigo-400/60"
+          className="pointer-events-none absolute -left-4 -top-16 -z-10 h-16 w-16 text-sky-500/70 dark:text-sky-400/60"
           style={{
             backgroundImage: "radial-gradient(currentColor 2px, transparent 2px)",
             backgroundSize: "16px 16px",
           }}
         />
-        <div className="pointer-events-none absolute -bottom-8 -right-8 -z-10 h-48 w-48 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500 opacity-30 blur-2xl dark:opacity-40" />
+        <div className="pointer-events-none absolute -bottom-8 -right-8 -z-10 h-48 w-48 rounded-full bg-gradient-to-br from-yellow-400 to-sky-500 opacity-30 blur-2xl dark:opacity-40" />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-5 -top-9 -z-10 hidden h-20 w-20 rotate-12 rounded-2xl border-[6px] border-indigo-500/50 dark:border-indigo-400/50 sm:block"
+          className="pointer-events-none absolute -right-5 -top-9 -z-10 hidden h-20 w-20 rotate-12 rounded-2xl border-[6px] border-sky-500/50 dark:border-sky-400/50 sm:block"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-6 left-1/3 -z-10 hidden h-14 w-14 -rotate-6 rounded-full border-[6px] border-violet-500/40 dark:border-violet-400/40 md:block"
+          className="pointer-events-none absolute -bottom-6 left-1/3 -z-10 hidden h-14 w-14 -rotate-6 rounded-full border-[6px] border-yellow-500/40 dark:border-yellow-400/40 md:block"
         />
 
-        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
           What's inside
         </span>
         <Slider slides={SLIDES} />
       </div>
 
       <div className="space-y-3">
-        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
           Gallery
         </span>
         <h2 className="font-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-gray-50 sm:text-3xl">
-          Real work, <span className="text-indigo-600 dark:text-indigo-400">real teams.</span>
+          Real work, <span className="text-sky-600 dark:text-sky-400">real teams.</span>
         </h2>
         <PhotoScroller photos={PHOTOS} />
       </div>
@@ -240,15 +232,15 @@ export function About() {
         <p className="font-heading text-xl font-semibold text-gray-800 dark:text-gray-200">
           "Search once, prepare everywhere."
         </p>
-        <Link
-          to="/search"
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
+        <a
+          href="#search"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
         >
           Start searching
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14M13 5l7 7-7 7" />
           </svg>
-        </Link>
+        </a>
       </div>
     </div>
   );

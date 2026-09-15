@@ -39,7 +39,7 @@ export function FeatureComparison({ rows }: { rows: ComparisonRow[] }) {
             <th className="w-16 bg-white px-2 py-3 text-center font-mono text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:bg-gray-900 dark:text-gray-500 sm:w-40 sm:px-5 sm:py-4 sm:text-xs">
               Without<span className="hidden sm:inline"> JobNeed</span>
             </th>
-            <th className="w-16 bg-indigo-50 px-2 py-3 text-center font-mono text-[10px] font-semibold uppercase tracking-wide text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300 sm:w-40 sm:px-5 sm:py-4 sm:text-xs">
+            <th className="w-16 bg-sky-50 px-2 py-3 text-center font-mono text-[10px] font-semibold uppercase tracking-wide text-sky-600 dark:bg-sky-500/10 dark:text-sky-300 sm:w-40 sm:px-5 sm:py-4 sm:text-xs">
               With<span className="hidden sm:inline"> JobNeed</span>
             </th>
           </tr>
@@ -58,7 +58,7 @@ export function FeatureComparison({ rows }: { rows: ComparisonRow[] }) {
               <td className="px-2 py-3 text-center text-gray-400 dark:text-gray-500 sm:px-5 sm:py-3.5">
                 <Cell value={row.without} />
               </td>
-              <td className="bg-indigo-50/50 px-2 py-3 text-center font-semibold text-gray-900 dark:bg-indigo-500/[0.06] dark:text-gray-100 sm:px-5 sm:py-3.5">
+              <td className="bg-sky-50/50 px-2 py-3 text-center font-semibold text-gray-900 dark:bg-sky-500/[0.06] dark:text-gray-100 sm:px-5 sm:py-3.5">
                 <Cell value={row.withUs} />
               </td>
             </tr>
