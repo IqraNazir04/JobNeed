@@ -122,15 +122,13 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
       <Marquee />
-      <div className="mx-auto w-full max-w-4xl px-4 pt-6">
-        <div className="relative flex flex-col items-center overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-800 shadow-xl shadow-black/20">
-          <div className="pointer-events-none absolute inset-0 [background:radial-gradient(circle_at_50%_35%,rgba(56,189,248,0.16),transparent_60%)]" />
-          <MotivationScene3D className="relative mx-auto h-64 w-full max-w-xl sm:h-80 lg:h-[26rem]" />
-          <div className="relative pb-5 sm:pb-6">
-            <span className="whitespace-nowrap rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-center font-mono text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gray-200 backdrop-blur-md sm:text-xs">
-              Momentum for your job search
-            </span>
-          </div>
+      <div className="relative flex w-full flex-col items-center overflow-hidden bg-black">
+        <div className="pointer-events-none absolute inset-0 [background:radial-gradient(circle_at_50%_35%,rgba(56,189,248,0.16),transparent_60%)]" />
+        <MotivationScene3D className="relative mx-auto h-72 w-full max-w-3xl sm:h-96 lg:h-[32rem]" />
+        <div className="relative pb-6 sm:pb-8">
+          <span className="whitespace-nowrap rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-center font-mono text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gray-200 backdrop-blur-md sm:text-xs">
+            Momentum for your job search
+          </span>
         </div>
       </div>
       <main className="relative mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children}</main>

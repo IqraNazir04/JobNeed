@@ -5,7 +5,6 @@ import { EmptyState } from "../components/EmptyState";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
-import { RotatingBadge } from "../components/RotatingBadge";
 import { SearchBar } from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
 
@@ -79,7 +78,6 @@ export function InterviewPrep({
             alt="Two professionals in an interview-style conversation"
             className="h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 lg:h-40 lg:w-80"
           />
-          <RotatingBadge className="absolute -bottom-6 -left-6 hidden lg:block" />
         </div>
       </div>
 

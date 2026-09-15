@@ -3,7 +3,6 @@ import { useState } from "react";
 import { generateCoverLetter, tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
-import { RotatingBadge } from "../components/RotatingBadge";
 import { useAuth } from "../context/AuthContext";
 import { useCV } from "../hooks/useCV";
 
@@ -131,7 +130,6 @@ export function CVBuilder() {
               alt="Code on a laptop screen"
               className="h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 lg:h-40 lg:w-80"
             />
-            <RotatingBadge className="absolute -bottom-6 -left-6 hidden lg:block" />
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@ import { ApplicationStatus } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
-import { RotatingBadge } from "../components/RotatingBadge";
 import { useAuth } from "../context/AuthContext";
 import { useJobModal } from "../context/JobModalContext";
 import { useSavedJobs } from "../hooks/useSavedJobs";
@@ -50,7 +49,6 @@ export function SavedJobs() {
             alt="A professional typing on a laptop"
             className="h-44 w-full rounded-2xl object-cover shadow-lg shadow-gray-900/10 lg:h-40 lg:w-80"
           />
-          <RotatingBadge className="absolute -bottom-6 -left-6 hidden lg:block" />
         </div>
       </div>
 
