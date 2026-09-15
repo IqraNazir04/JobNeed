@@ -55,6 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // private mode / quota — session still works for this tab
     }
+    // Set the token on the API client synchronously, before setUser below can
+    // trigger a child effect (e.g. Account's GitHub-stats fetch) that fires
+    // before the [token] effect further down gets a chance to run — otherwise
+    // that request goes out with no Authorization header and 401s.
+    api.setAuthToken(newToken);
     setToken(newToken);
     setUser(newUser);
   }
