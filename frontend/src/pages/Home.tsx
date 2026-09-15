@@ -38,14 +38,23 @@ const FEATURE_LINKS = [
   },
 ];
 
-const KNOWN_SOURCES = ["greenhouse", "lever", "linkedin", "indeed", "google_jobs", "remoteok"];
+const KNOWN_SOURCES = [
+  "greenhouse",
+  "lever",
+  "linkedin",
+  "indeed",
+  "google_jobs",
+  "remoteok",
+  "ashby",
+  "jobicy",
+];
 
 type Status = "idle" | "loading" | "error" | "done";
 
 export function Home() {
   usePageMeta(
     "Search Jobs Across Every Major Board",
-    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, Google Jobs, and Remote OK at once, ranked by AI to match what you're actually looking for."
+    "Search Greenhouse, Lever, LinkedIn, Upwork, Indeed, Google Jobs, Remote OK, Ashby, and Jobicy at once, ranked by AI to match what you're actually looking for."
   );
 
   const [results, setResults] = useState<SearchResult[]>([]);

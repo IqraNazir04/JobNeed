@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import httpx
 
-from app.scrapers.base import JobSource, RawJob, strip_html
+from app.scrapers.base import JobSource, RawJob, normalize_remote_location, strip_html
 
 _USER_AGENT = "Mozilla/5.0 (compatible; JobNeedBot/1.0)"
 
@@ -51,9 +51,9 @@ class RemoteOKSource(JobSource):
                     source=self.name,
                     title=title,
                     company=result.get("company", ""),
-                    # Remote OK postings are all remote; the API often
-                    # leaves location blank rather than saying so explicitly.
-                    location=result.get("location") or "Remote",
+                    # Remote OK postings are all remote, but the location
+                    # field is often a city/country instead of saying so.
+                    location=normalize_remote_location(result.get("location")),
                     description=description,
                     url=result.get("url") or result.get("apply_url", ""),
                     posted_at=posted_at,

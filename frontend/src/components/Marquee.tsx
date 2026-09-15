@@ -6,6 +6,8 @@ const ITEMS = [
   "Indeed",
   "Google Jobs",
   "Remote OK",
+  "Ashby",
+  "Jobicy",
   "AI-powered search",
   "Built with Claude",
 ];

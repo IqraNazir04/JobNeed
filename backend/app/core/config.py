@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     greenhouse_boards: str = "gitlab"
     lever_boards: str = ""
 
+    # Ashby's job board API works the same way - public, no key, meant for
+    # embedding a company's postings elsewhere. Comma-separated board
+    # names (found in a company's jobs.ashbyhq.com/<name> URL).
+    ashby_boards: str = ""
+
     # Company career pages known to publish schema.org JobPosting structured
     # data (https://developers.google.com/search/docs/appearance/structured-data/job-posting)
     # - comma-separated URLs.

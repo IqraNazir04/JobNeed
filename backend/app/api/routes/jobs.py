@@ -7,9 +7,11 @@ from app.core.database import get_db
 from app.models.job import Job
 from app.models.user import User
 from app.schemas.job import ImportUrlRequest, JobOut
+from app.scrapers.ashby import AshbySource
 from app.scrapers.base import JobSource
 from app.scrapers.google_jobs import GoogleJobsSource
 from app.scrapers.greenhouse import GreenhouseSource
+from app.scrapers.jobicy import JobicySource
 from app.scrapers.jobposting_schema import JobPostingSchemaSource
 from app.scrapers.lever import LeverSource
 from app.scrapers.remoteok import RemoteOKSource
@@ -26,6 +28,8 @@ _SOURCES: dict[str, type[JobSource]] = {
     "lever": LeverSource,
     "jobposting_schema": JobPostingSchemaSource,
     "remoteok": RemoteOKSource,
+    "jobicy": JobicySource,
+    "ashby": AshbySource,
 }
 
 
@@ -45,9 +49,9 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
 @router.post("/ingest/{source_name}", response_model=list[JobOut])
 def ingest_source(source_name: str, query: str = "", db: Session = Depends(get_db)):
     """Fetch postings from a named source and persist them. `sample` is a
-    local fixture; `greenhouse`, `lever`, `jobposting_schema`, and `remoteok`
-    pull live postings with no API key; `google_jobs` requires
-    SERPAPI_API_KEY."""
+    local fixture; `greenhouse`, `lever`, `ashby`, `jobposting_schema`,
+    `remoteok`, and `jobicy` pull live postings with no API key;
+    `google_jobs` requires SERPAPI_API_KEY."""
     source_cls = _SOURCES.get(source_name)
     if source_cls is None:
         raise HTTPException(
