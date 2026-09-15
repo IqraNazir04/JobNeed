@@ -44,7 +44,12 @@ def test_ingest_unconfigured_source_returns_400(client):
     assert res.status_code == 400
 
 
-def test_import_url_persists_job(client):
+def test_import_url_requires_auth(client):
+    res = client.post("/api/jobs/import-url", json={"url": "https://example.com/x"})
+    assert res.status_code == 401
+
+
+def test_import_url_persists_job(client, auth_headers):
     from unittest.mock import patch
 
     from app.scrapers.base import RawJob
@@ -62,6 +67,7 @@ def test_import_url_persists_job(client):
         res = client.post(
             "/api/jobs/import-url",
             json={"url": "https://acme.example/careers/backend-engineer"},
+            headers=auth_headers,
         )
     assert res.status_code == 200
     assert res.json()["id"] == "url-abc123"
@@ -70,18 +76,18 @@ def test_import_url_persists_job(client):
     assert res.status_code == 200
 
 
-def test_import_url_returns_422_when_page_has_no_title(client):
+def test_import_url_returns_422_when_page_has_no_title(client, auth_headers):
     with patch("app.api.routes.jobs.fetch_from_url", side_effect=ValueError("no title")):
-        res = client.post("/api/jobs/import-url", json={"url": "https://example.com/x"})
+        res = client.post("/api/jobs/import-url", json={"url": "https://example.com/x"}, headers=auth_headers)
     assert res.status_code == 422
 
 
-def test_import_url_returns_400_on_unreachable_url(client):
+def test_import_url_returns_400_on_unreachable_url(client, auth_headers):
     import httpx
 
     with patch(
         "app.api.routes.jobs.fetch_from_url",
         side_effect=httpx.ConnectError("boom"),
     ):
-        res = client.post("/api/jobs/import-url", json={"url": "https://example.com/x"})
+        res = client.post("/api/jobs/import-url", json={"url": "https://example.com/x"}, headers=auth_headers)
     assert res.status_code == 400

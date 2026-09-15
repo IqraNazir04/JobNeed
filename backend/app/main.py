@@ -2,11 +2,15 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 import app.models  # noqa: F401 - registers all models on Base.metadata
 from app.api.routes import auth, chat, cv, interview, jobs, saved_jobs, search, speaking
 from app.core.config import settings
 from app.core.database import Base, engine, run_lightweight_migrations
+from app.core.rate_limit import limiter
 
 Base.metadata.create_all(bind=engine)
 run_lightweight_migrations()
@@ -19,6 +23,10 @@ if settings.jwt_secret_key == "dev-insecure-secret-change-me-in-your-own-dotenv-
     )
 
 app = FastAPI(title="JobNeed API")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

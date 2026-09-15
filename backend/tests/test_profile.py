@@ -34,10 +34,10 @@ def test_update_profile_round_trips(client, auth_headers):
 
 def test_profile_is_per_user(client):
     token_a = client.post(
-        "/api/auth/register", json={"email": "a@example.com", "password": "x"}
+        "/api/auth/register", json={"email": "a@example.com", "password": "testpass1"}
     ).json()["access_token"]
     token_b = client.post(
-        "/api/auth/register", json={"email": "b@example.com", "password": "x"}
+        "/api/auth/register", json={"email": "b@example.com", "password": "testpass1"}
     ).json()["access_token"]
 
     client.patch(

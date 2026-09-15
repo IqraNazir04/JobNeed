@@ -34,13 +34,15 @@ export function Login() {
       showToast(mode === "login" ? "Welcome back!" : "Account created");
       navigate("/");
     } catch (err) {
-      setError(
-        mode === "login"
-          ? "Couldn't log in — check your email and password."
-          : err instanceof Error && err.message.includes("400")
-            ? "That email is already registered."
-            : "Couldn't create your account right now."
-      );
+      if (mode === "login") {
+        setError("Couldn't log in — check your email and password.");
+      } else if (err instanceof Error && err.message.includes("400")) {
+        setError("That email is already registered.");
+      } else if (err instanceof Error && err.message.includes("422")) {
+        setError("Password must be at least 8 characters.");
+      } else {
+        setError("Couldn't create your account right now.");
+      }
     } finally {
       setLoading(false);
     }
@@ -86,11 +88,14 @@ export function Login() {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={mode === "signup" ? 8 : undefined}
                 className={inputClass}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {mode === "signup" && (
+                <p className="text-xs text-gray-400 dark:text-gray-500">At least 8 characters.</p>
+              )}
             </div>
 
             {error && (

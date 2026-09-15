@@ -3,6 +3,30 @@ def test_get_cv_requires_auth(client):
     assert res.status_code == 401
 
 
+def test_tailor_requires_auth(client):
+    res = client.post(
+        "/api/cv/tailor",
+        json={
+            "cv": {"name": "", "email": "", "phone": "", "location": "", "links": "",
+                   "summary": "", "experience": [], "education": [], "skills": []},
+            "job_description": "Backend engineer role.",
+        },
+    )
+    assert res.status_code == 401
+
+
+def test_cover_letter_requires_auth(client):
+    res = client.post(
+        "/api/cv/cover-letter",
+        json={
+            "cv": {"name": "", "email": "", "phone": "", "location": "", "links": "",
+                   "summary": "", "experience": [], "education": [], "skills": []},
+            "job_description": "Backend engineer role.",
+        },
+    )
+    assert res.status_code == 401
+
+
 def test_get_cv_before_saving_returns_empty_cv(client, auth_headers):
     res = client.get("/api/cv", headers=auth_headers)
     assert res.status_code == 200
@@ -37,10 +61,10 @@ def test_save_and_get_cv_round_trips(client, auth_headers):
 
 def test_cv_is_per_user(client):
     token_a = client.post(
-        "/api/auth/register", json={"email": "a@example.com", "password": "x"}
+        "/api/auth/register", json={"email": "a@example.com", "password": "testpass1"}
     ).json()["access_token"]
     token_b = client.post(
-        "/api/auth/register", json={"email": "b@example.com", "password": "x"}
+        "/api/auth/register", json={"email": "b@example.com", "password": "testpass1"}
     ).json()["access_token"]
 
     client.put(

@@ -16,10 +16,26 @@ import { usePageMeta } from "../hooks/usePageMeta";
 import { useSavedJobs } from "../hooks/useSavedJobs";
 
 const FEATURE_LINKS = [
-  { to: "/assistant", label: "Ask the AI Assistant" },
-  { to: "/cv", label: "Tailor your CV" },
-  { to: "/interview", label: "Prepare for interviews" },
-  { to: "/speaking", label: "Practice speaking" },
+  {
+    to: "/assistant",
+    label: "Ask the AI Assistant",
+    className: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20",
+  },
+  {
+    to: "/cv",
+    label: "Tailor your CV",
+    className: "bg-violet-50 text-violet-700 hover:bg-violet-100 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20",
+  },
+  {
+    to: "/interview",
+    label: "Prepare for interviews",
+    className: "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20",
+  },
+  {
+    to: "/speaking",
+    label: "Practice speaking",
+    className: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20",
+  },
 ];
 
 const KNOWN_SOURCES = ["greenhouse", "lever", "linkedin", "indeed", "google_jobs"];
@@ -223,37 +239,27 @@ export function Home() {
         </div>
       )}
 
-      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1700819000398-d1b72be76844?auto=format&fit=crop&w=1600&q=80)",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/85 to-gray-950/50" />
-        <div className="relative mx-auto max-w-4xl px-4 py-16 sm:py-20">
-          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300">
-            Beyond search
-          </span>
-          <h2 className="mt-3 max-w-lg font-heading text-3xl font-bold leading-[1.1] text-white sm:text-4xl">
-            The search is just the <span className="text-indigo-300">start.</span>
-          </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-300">
-            Once you've found a role worth applying to, JobNeed helps you tailor your CV, prep for the
-            interview, and practice how you'll answer out loud.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2.5">
-            {FEATURE_LINKS.map((f) => (
-              <Link
-                key={f.to}
-                to={f.to}
-                className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/40 hover:bg-white/10"
-              >
-                {f.label}
-              </Link>
-            ))}
-          </div>
+      <div className="space-y-3">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+          Beyond search
+        </span>
+        <h2 className="max-w-lg font-heading text-3xl font-bold leading-[1.1] text-gray-950 dark:text-gray-50 sm:text-4xl">
+          The search is just the <span className="text-indigo-600 dark:text-indigo-400">start.</span>
+        </h2>
+        <p className="max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          Once you've found a role worth applying to, JobNeed helps you tailor your CV, prep for the
+          interview, and practice how you'll answer out loud.
+        </p>
+        <div className="flex flex-wrap gap-2.5 pt-1">
+          {FEATURE_LINKS.map((f) => (
+            <Link
+              key={f.to}
+              to={f.to}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${f.className}`}
+            >
+              {f.label}
+            </Link>
+          ))}
         </div>
       </div>
     </div>

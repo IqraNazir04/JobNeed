@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { generateCoverLetter, tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
@@ -52,7 +53,7 @@ export function CVBuilder() {
   }
 
   async function handleTailor() {
-    if (!jobDescription.trim()) return;
+    if (!jobDescription.trim() || !user) return;
     setTailoring(true);
     setTailorError(null);
     setTailorResult(null);
@@ -66,7 +67,7 @@ export function CVBuilder() {
   }
 
   async function handleGenerateCoverLetter() {
-    if (!jobDescription.trim()) return;
+    if (!jobDescription.trim() || !user) return;
     setGeneratingLetter(true);
     setLetterError(null);
     setCoverLetter("");
@@ -241,11 +242,20 @@ export function CVBuilder() {
             />
             <button
               onClick={handleTailor}
-              disabled={tailoring || !jobDescription.trim()}
+              disabled={tailoring || !jobDescription.trim() || !user}
+              title={!user ? "Log in to use AI tailoring" : undefined}
               className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {tailoring ? "Tailoring…" : "Tailor with AI"}
             </button>
+            {!user && (
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                <Link to="/login" className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+                  Log in
+                </Link>{" "}
+                to use AI tailoring.
+              </p>
+            )}
 
             {tailorError && <p className="text-sm text-red-600 dark:text-red-400">{tailorError}</p>}
 
@@ -299,12 +309,20 @@ export function CVBuilder() {
             </div>
             <button
               onClick={handleGenerateCoverLetter}
-              disabled={generatingLetter || !jobDescription.trim()}
+              disabled={generatingLetter || !jobDescription.trim() || !user}
               className="rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-              title={!jobDescription.trim() ? "Paste a job description above first" : undefined}
+              title={!user ? "Log in to generate a cover letter" : !jobDescription.trim() ? "Paste a job description above first" : undefined}
             >
               {generatingLetter ? "Writing…" : "Generate cover letter"}
             </button>
+            {!user && (
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                <Link to="/login" className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+                  Log in
+                </Link>{" "}
+                to generate a cover letter.
+              </p>
+            )}
 
             {letterError && <p className="text-sm text-red-600 dark:text-red-400">{letterError}</p>}
 

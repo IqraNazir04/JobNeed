@@ -2,8 +2,10 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models.job import Job
+from app.models.user import User
 from app.schemas.job import ImportUrlRequest, JobOut
 from app.scrapers.base import JobSource
 from app.scrapers.google_jobs import GoogleJobsSource
@@ -56,7 +58,11 @@ def ingest_source(source_name: str, query: str = "", db: Session = Depends(get_d
 
 
 @router.post("/import-url", response_model=JobOut)
-def import_from_url(payload: ImportUrlRequest, db: Session = Depends(get_db)):
+def import_from_url(
+    payload: ImportUrlRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Import a single job posting from its public URL (e.g. a LinkedIn job
     link) using the page's Open Graph preview metadata — no bulk scraping,
     no credentials, just the same tags the site publishes for link previews."""

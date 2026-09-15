@@ -36,13 +36,29 @@ GENERIC_HTML = """
 def _fake_response(html: str):
     resp = MagicMock()
     resp.text = html
+    resp.is_redirect = False
     resp.raise_for_status = MagicMock()
     return resp
 
 
+def _redirect_response(location: str):
+    resp = MagicMock()
+    resp.is_redirect = True
+    resp.headers = {"location": location}
+    return resp
+
+
+# ensure_safe_url does real DNS resolution, which these tests shouldn't
+# depend on - they're testing HTML parsing, not the SSRF guard (that has
+# its own dedicated tests in test_url_safety.py). Patching it to a no-op
+# here also means test URLs like https://acme.example don't need to
+# actually resolve (.example is a reserved, non-resolvable TLD).
+_NOOP_SAFETY = patch("app.scrapers.url_import.ensure_safe_url")
+
+
 def test_fetch_from_url_parses_linkedin_title():
     url = "https://www.linkedin.com/jobs/view/software-engineer-at-meeboss-4463366960"
-    with patch("app.scrapers.url_import.httpx.get", return_value=_fake_response(LINKEDIN_HTML)):
+    with _NOOP_SAFETY, patch("app.scrapers.url_import.httpx.get", return_value=_fake_response(LINKEDIN_HTML)):
         job = fetch_from_url(url)
 
     assert job.title == "Software Engineer"
@@ -56,7 +72,7 @@ def test_fetch_from_url_parses_linkedin_title():
 
 def test_fetch_from_url_parses_linkedin_title_without_site_name_tag():
     url = "https://www.linkedin.com/jobs/view/software-engineer-at-meeboss-4463366960"
-    with patch(
+    with _NOOP_SAFETY, patch(
         "app.scrapers.url_import.httpx.get",
         return_value=_fake_response(LINKEDIN_HTML_NO_SITE_NAME),
     ):
@@ -69,7 +85,7 @@ def test_fetch_from_url_parses_linkedin_title_without_site_name_tag():
 
 def test_fetch_from_url_falls_back_for_non_linkedin_sites():
     url = "https://acme.example/careers/backend-engineer"
-    with patch("app.scrapers.url_import.httpx.get", return_value=_fake_response(GENERIC_HTML)):
+    with _NOOP_SAFETY, patch("app.scrapers.url_import.httpx.get", return_value=_fake_response(GENERIC_HTML)):
         job = fetch_from_url(url)
 
     assert job.title == "Backend Engineer"
@@ -79,7 +95,7 @@ def test_fetch_from_url_falls_back_for_non_linkedin_sites():
 
 
 def test_fetch_from_url_raises_when_no_title_found():
-    with patch(
+    with _NOOP_SAFETY, patch(
         "app.scrapers.url_import.httpx.get",
         return_value=_fake_response("<html><head></head><body></body></html>"),
     ):
@@ -88,9 +104,42 @@ def test_fetch_from_url_raises_when_no_title_found():
 
 
 def test_fetch_from_url_propagates_http_errors():
-    with patch(
+    with _NOOP_SAFETY, patch(
         "app.scrapers.url_import.httpx.get",
         side_effect=httpx.ConnectError("boom"),
     ):
         with pytest.raises(httpx.HTTPError):
             fetch_from_url("https://example.com/unreachable")
+
+
+def test_fetch_from_url_rejects_unsafe_initial_url():
+    with patch(
+        "app.scrapers.url_import.ensure_safe_url", side_effect=ValueError("blocked")
+    ), patch("app.scrapers.url_import.httpx.get") as mock_get:
+        with pytest.raises(ValueError):
+            fetch_from_url("http://169.254.169.254/latest/meta-data/")
+    mock_get.assert_not_called()
+
+
+def test_fetch_from_url_follows_a_safe_redirect():
+    with _NOOP_SAFETY, patch(
+        "app.scrapers.url_import.httpx.get",
+        side_effect=[_redirect_response("https://acme.example/final"), _fake_response(GENERIC_HTML)],
+    ):
+        job = fetch_from_url("https://acme.example/careers/backend-engineer")
+    assert job.title == "Backend Engineer"
+
+
+def test_fetch_from_url_blocks_a_redirect_to_an_unsafe_host():
+    def fake_ensure_safe_url(url):
+        if "internal" in url:
+            raise ValueError("That URL points to a private or internal address, which isn't allowed.")
+
+    with patch(
+        "app.scrapers.url_import.ensure_safe_url", side_effect=fake_ensure_safe_url
+    ), patch(
+        "app.scrapers.url_import.httpx.get",
+        return_value=_redirect_response("http://internal.local/secret"),
+    ):
+        with pytest.raises(ValueError):
+            fetch_from_url("https://acme.example/careers/backend-engineer")

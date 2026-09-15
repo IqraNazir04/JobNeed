@@ -56,10 +56,10 @@ def test_saved_jobs_are_per_user(client):
     client.post("/api/jobs/ingest/sample")
 
     token_a = client.post(
-        "/api/auth/register", json={"email": "a@example.com", "password": "x"}
+        "/api/auth/register", json={"email": "a@example.com", "password": "testpass1"}
     ).json()["access_token"]
     token_b = client.post(
-        "/api/auth/register", json={"email": "b@example.com", "password": "x"}
+        "/api/auth/register", json={"email": "b@example.com", "password": "testpass1"}
     ).json()["access_token"]
 
     client.put("/api/saved-jobs/sample-1", headers={"Authorization": f"Bearer {token_a}"})

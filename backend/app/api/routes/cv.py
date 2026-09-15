@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.core.rate_limit import limiter
 from app.models.cv import CVRecord
 from app.models.user import User
 from app.rag.cover_letter import generate_cover_letter
@@ -13,12 +14,16 @@ router = APIRouter(prefix="/cv", tags=["cv"])
 
 
 @router.post("/tailor", response_model=TailorCVResponse)
-def tailor(payload: TailorCVRequest):
+@limiter.limit("10/minute")
+def tailor(request: Request, payload: TailorCVRequest, current_user: User = Depends(get_current_user)):
     return tailor_cv(payload.cv, payload.job_description)
 
 
 @router.post("/cover-letter", response_model=CoverLetterResponse)
-def cover_letter(payload: CoverLetterRequest):
+@limiter.limit("10/minute")
+def cover_letter(
+    request: Request, payload: CoverLetterRequest, current_user: User = Depends(get_current_user)
+):
     return generate_cover_letter(payload.cv, payload.job_description, payload.company, payload.job_title)
 
 
