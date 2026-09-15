@@ -4,6 +4,7 @@ import { getGithubStats, GithubStats, updateProfile } from "../api/client";
 import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { extractGithubUsername } from "../lib/github";
 
 const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
@@ -150,7 +151,7 @@ function ProfilePanel() {
   useEffect(() => {
     if (!user?.github_username) return;
     setLoadingGithub(true);
-    getGithubStats(user.github_username)
+    getGithubStats(extractGithubUsername(user.github_username))
       .then(setGithubStats)
       .catch(() => setGithubError("Couldn't load GitHub data for this username."))
       .finally(() => setLoadingGithub(false));
@@ -162,12 +163,14 @@ function ProfilePanel() {
     setSaving(true);
     setError(null);
     try {
+      const cleanedGithubUsername = extractGithubUsername(githubUsername);
       const updated = await updateProfile({
         linkedin_url: linkedinUrl.trim(),
         indeed_url: indeedUrl.trim(),
         upwork_url: upworkUrl.trim(),
-        github_username: githubUsername.trim(),
+        github_username: cleanedGithubUsername,
       });
+      setGithubUsername(cleanedGithubUsername);
       setUser(updated);
       showToast("Profile saved");
     } catch (e) {
