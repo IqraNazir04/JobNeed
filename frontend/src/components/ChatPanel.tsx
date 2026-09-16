@@ -2,6 +2,7 @@ import { useState } from "react";
 import { chat, Job } from "../api/client";
 import { useSavedJobs } from "../context/SavedJobsContext";
 import { JobCard } from "./JobCard";
+import { MarkdownLite } from "./MarkdownLite";
 import { SearchBar } from "./SearchBar";
 
 const SUGGESTED_PROMPTS = [
@@ -60,8 +61,8 @@ export function ChatPanel() {
       {loading && <p className="text-sm text-gray-500 dark:text-gray-400">Thinking…</p>}
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       {answer && (
-        <div className="whitespace-pre-wrap rounded-2xl bg-gray-100 p-4 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/60 dark:text-gray-200">
-          {answer}
+        <div className="rounded-2xl bg-gray-100 p-4 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/60 dark:text-gray-200">
+          <MarkdownLite text={answer} />
         </div>
       )}
       {matches.length > 0 && (
