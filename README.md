@@ -41,6 +41,11 @@ feedback on your spoken answers — all in one scrolling, single-page app.
 - **Accounts** — email/password auth with rate-limited, cost-controlled
   AI endpoints; connect your LinkedIn/Indeed/Upwork/GitHub profiles to
   personalize search and sharpen cover letters.
+- **Job board** — the site owner can post original listings directly on
+  JobNeed (Account section → Job board, once logged in as the admin
+  account). A posting is stored and indexed exactly like a scraped one, so
+  it shows up in Search and the AI Assistant automatically — no separate
+  listing page. See [Job board](#job-board) below.
 
 The whole app lives on one URL with a sticky, scroll-spy nav — no page
 reloads between sections, and job details open in a modal rather than a
@@ -118,6 +123,29 @@ Trigger an ingest with `POST /api/jobs/ingest/{source}` where `{source}` is
 `jobposting_schema`, or `google_jobs`, with an optional `?query=` to filter
 by title/description. Import a single posting with `POST /api/jobs/import-url`.
 
+## Job board
+
+Beyond aggregating other sites, JobNeed can host original postings of its
+own. It's single-admin by design: set `ADMIN_EMAIL` in `.env` to the one
+account allowed to post (`app/models/user.py`'s `User.is_admin` is a
+config-driven property, not a stored column, so there's no DB state that
+could accidentally grant admin to the wrong account). Log in as that account
+and a "Job board" panel appears in the Account section with a form to post,
+edit, and close listings, plus a list of what you've posted.
+
+A posting goes through the exact same path as a scraped one
+(`services/ingestion.py`'s `ingest_one`) — stored as `source: "jobneed"` and
+embedded into the same vector index — so it's searchable and shows up in the
+AI Assistant immediately, ranked the same way as everything else. Closing a
+posting removes it from the vector index right away
+(`rag/vector_store.delete_job`) so it stops surfacing in search, while the
+row itself stays in Postgres for your own records.
+
+Endpoints: `POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}`
+(edit), `POST /api/jobs/board/{id}/close`, `GET /api/jobs/board/mine` — all
+require the admin account and 403 for anyone else; edits are scoped to
+`source == "jobneed"` so they can't touch a scraped posting.
+
 ## Security notes
 
 - **Auth required on AI endpoints.** `/cv/tailor`, `/cv/cover-letter`, and
@@ -156,7 +184,7 @@ ship wheels for newer versions. (The Docker image already pins 3.12, so
 `docker compose up` is unaffected regardless of your local Python.)
 ```bash
 cd backend
-cp .env.example .env   # fill in ANTHROPIC_API_KEY and DB settings
+cp .env.example .env   # fill in ANTHROPIC_API_KEY, DB settings, and ADMIN_EMAIL
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
