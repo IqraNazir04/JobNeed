@@ -41,10 +41,10 @@ feedback on your spoken answers — all in one scrolling, single-page app.
 - **Accounts** — email/password auth with rate-limited, cost-controlled
   AI endpoints; connect your LinkedIn/Indeed/Upwork/GitHub profiles to
   personalize search and sharpen cover letters.
-- **Job board** — the site owner can post original listings directly on
-  JobNeed (Account section → Job board, once logged in as the admin
-  account). A posting is stored and indexed exactly like a scraped one, so
-  it shows up in Search and the AI Assistant automatically — no separate
+- **Job board** — one or more site-owner accounts can post original listings
+  directly on JobNeed (Account section → Job board admin, its own separate
+  login). A posting is stored and indexed exactly like a scraped one, so it
+  shows up in Search and the AI Assistant automatically — no separate
   listing page. See [Job board](#job-board) below.
 
 The whole app lives on one URL with a sticky, scroll-spy nav — no page
@@ -126,12 +126,20 @@ by title/description. Import a single posting with `POST /api/jobs/import-url`.
 ## Job board
 
 Beyond aggregating other sites, JobNeed can host original postings of its
-own. It's single-admin by design: set `ADMIN_EMAIL` in `.env` to the one
-account allowed to post (`app/models/user.py`'s `User.is_admin` is a
-config-driven property, not a stored column, so there's no DB state that
-could accidentally grant admin to the wrong account). Log in as that account
-and a "Job board" panel appears in the Account section with a form to post,
-edit, and close listings, plus a list of what you've posted.
+own — and the admin panel is deliberately **decoupled from regular user
+accounts**: it's its own login, with its own password, checked against
+`.env`, not the `users` table. An admin's access never depends on (or
+shares a password with) any job-seeker account that happens to use the same
+email.
+
+Set `ADMIN_EMAILS` (comma-separated, so more than one person can hold admin
+access) and `ADMIN_PASSWORD` (a single shared secret) in `.env`. In the
+Account section, a "Job board admin" box asks for that email + password,
+separately from the regular Log in / Sign up form above it — logging in
+there requires no user account at all. Once in, a panel appears with a form
+to post, edit, and close listings, plus a list of what's been posted; the
+session persists across reloads via its own token, independent of whether a
+regular user is logged in on the same device.
 
 A posting goes through the exact same path as a scraped one
 (`services/ingestion.py`'s `ingest_one`) — stored as `source: "jobneed"` and
@@ -141,10 +149,13 @@ posting removes it from the vector index right away
 (`rag/vector_store.delete_job`) so it stops surfacing in search, while the
 row itself stays in Postgres for your own records.
 
-Endpoints: `POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}`
-(edit), `POST /api/jobs/board/{id}/close`, `GET /api/jobs/board/mine` — all
-require the admin account and 403 for anyone else; edits are scoped to
-`source == "jobneed"` so they can't touch a scraped posting.
+Endpoints: `POST /api/auth/admin-login` (issues an admin session token,
+subject-prefixed `admin:` so it's never mistaken for a regular user token),
+`POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}` (edit),
+`POST /api/jobs/board/{id}/close`, `GET /api/jobs/board/mine` — the latter
+four require a valid admin token (401 with none/invalid, 403 if the email
+was since removed from `ADMIN_EMAILS`) and are scoped to `source ==
+"jobneed"` so they can't touch a scraped posting.
 
 ## Security notes
 
@@ -184,7 +195,7 @@ ship wheels for newer versions. (The Docker image already pins 3.12, so
 `docker compose up` is unaffected regardless of your local Python.)
 ```bash
 cd backend
-cp .env.example .env   # fill in ANTHROPIC_API_KEY, DB settings, and ADMIN_EMAIL
+cp .env.example .env   # fill in ANTHROPIC_API_KEY, DB settings, and ADMIN_EMAILS/ADMIN_PASSWORD
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload

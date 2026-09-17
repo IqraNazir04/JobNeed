@@ -42,9 +42,17 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7  # 7 days
 
-    # The one account allowed to post to the job board. Single-admin by
-    # design - set to your own account's email in .env.
-    admin_email: str = ""
+    # Job-board admin panel. Deliberately decoupled from regular user
+    # accounts - logging in here never involves the `users` table at all,
+    # so an admin's access doesn't depend on (or share a password with) any
+    # job-seeker account that happens to use the same email. Comma-separated
+    # allowlist of emails, checked against a single shared ADMIN_PASSWORD.
+    admin_emails: str = ""
+    admin_password: str = ""
+
+    @property
+    def admin_email_set(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 
 
 settings = Settings()

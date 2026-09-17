@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.config import settings
 from app.core.database import Base
 
 
@@ -21,11 +20,3 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )
-
-    @property
-    def is_admin(self) -> bool:
-        """Single-admin model: whoever's email matches ADMIN_EMAIL in .env
-        can post to the job board. Not a stored column - keeping it a
-        config-driven property means there's no DB state that could
-        accidentally grant admin to the wrong account."""
-        return bool(settings.admin_email) and self.email.lower() == settings.admin_email.lower()

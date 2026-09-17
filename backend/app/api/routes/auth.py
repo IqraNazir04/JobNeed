@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import ADMIN_SUBJECT_PREFIX, get_current_user
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token, hash_password, verify_password
 from app.integrations.github import fetch_github_stats
 from app.models.user import User
 from app.schemas.auth import (
+    AdminLoginRequest,
+    AdminTokenResponse,
     GithubStats,
     LoginRequest,
     ProfileUpdateRequest,
@@ -65,3 +68,21 @@ def update_profile(
 @router.get("/github-stats/{username}", response_model=GithubStats)
 def github_stats(username: str, current_user: User = Depends(get_current_user)):
     return fetch_github_stats(username)
+
+
+@router.post("/admin-login", response_model=AdminTokenResponse)
+def admin_login(payload: AdminLoginRequest):
+    """Separate login for the job-board admin panel - checked against
+    ADMIN_EMAILS/ADMIN_PASSWORD in .env, never against the `users` table.
+    An admin's access and password are entirely independent of any regular
+    job-seeker account, even one that happens to share the same email."""
+    email = payload.email.strip().lower()
+    if (
+        not settings.admin_password
+        or email not in settings.admin_email_set
+        or payload.password != settings.admin_password
+    ):
+        raise HTTPException(status_code=401, detail="Invalid admin email or password")
+
+    token = create_access_token(f"{ADMIN_SUBJECT_PREFIX}{email}")
+    return AdminTokenResponse(access_token=token, email=email)

@@ -18,8 +18,11 @@ def test_create_board_job_requires_auth(client):
 
 
 def test_create_board_job_requires_admin(client, auth_headers):
+    # A regular user token isn't an admin-session token at all, so this is
+    # "not authenticated as admin" (401), not "authenticated but lacking
+    # admin rights" (403) - the two auth systems are fully decoupled.
     res = client.post("/api/jobs/board", json=_create_payload(), headers=auth_headers)
-    assert res.status_code == 403
+    assert res.status_code == 401
 
 
 def test_admin_can_create_board_job(client, admin_auth_headers):
@@ -43,7 +46,7 @@ def test_board_job_shows_up_in_public_list(client, admin_auth_headers):
 
 def test_list_my_board_jobs_requires_admin(client, auth_headers):
     res = client.get("/api/jobs/board/mine", headers=auth_headers)
-    assert res.status_code == 403
+    assert res.status_code == 401
 
 
 def test_list_my_board_jobs_returns_only_jobneed_postings(client, admin_auth_headers):
@@ -83,7 +86,7 @@ def test_update_board_job_requires_admin(client, admin_auth_headers, auth_header
         json={"title": "Hijacked"},
         headers=auth_headers,
     )
-    assert res.status_code == 403
+    assert res.status_code == 401
 
 
 def test_cannot_edit_a_scraped_job_through_board_endpoint(client, admin_auth_headers):
@@ -122,11 +125,23 @@ def test_close_board_job_requires_admin(client, admin_auth_headers, auth_headers
     ).json()
 
     res = client.post(f"/api/jobs/board/{created['id']}/close", headers=auth_headers)
+    assert res.status_code == 401
+
+
+def test_admin_token_cannot_be_used_as_a_regular_user_token(client, admin_auth_headers):
+    """Admin sessions are entirely separate from the `users` table - an
+    admin token has no corresponding user row to look up."""
+    res = client.get("/api/auth/me", headers=admin_auth_headers)
+    assert res.status_code == 401
+
+
+def test_valid_admin_token_gets_403_once_removed_from_allowlist(client, admin_auth_headers, monkeypatch):
+    """A well-formed admin session token that's no longer on the allowlist
+    (e.g. ADMIN_EMAILS changed after it was issued) is the one case that
+    should read as 403 rather than 401 - it's a real admin token, just for
+    an email that isn't allowed anymore."""
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "admin_emails", "someone-else@example.com")
+    res = client.get("/api/jobs/board/mine", headers=admin_auth_headers)
     assert res.status_code == 403
-
-
-def test_me_reports_is_admin(client, admin_auth_headers, auth_headers):
-    admin_me = client.get("/api/auth/me", headers=admin_auth_headers).json()
-    regular_me = client.get("/api/auth/me", headers=auth_headers).json()
-    assert admin_me["is_admin"] is True
-    assert regular_me["is_admin"] is False

@@ -4,7 +4,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_admin_user, get_current_user
+from app.api.deps import get_current_admin, get_current_user
 from app.core.database import get_db
 from app.models.job import Job
 from app.models.user import User
@@ -55,7 +55,7 @@ def _compose_board_location(location: str, remote: bool) -> str:
 @router.get("/board/mine", response_model=list[JobOut])
 def list_my_board_jobs(
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin_user),
+    _admin_email: str = Depends(get_current_admin),
 ):
     return (
         db.query(Job)
@@ -69,7 +69,7 @@ def list_my_board_jobs(
 def create_board_job(
     payload: JobBoardCreate,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin_user),
+    _admin_email: str = Depends(get_current_admin),
 ):
     """Post a job directly on JobNeed (the site owner only). It's stored and
     indexed exactly like a scraped posting - source "jobneed" - so it shows
@@ -94,7 +94,7 @@ def update_board_job(
     job_id: str,
     payload: JobBoardUpdate,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin_user),
+    _admin_email: str = Depends(get_current_admin),
 ):
     job = db.get(Job, job_id)
     if job is None or job.source != "jobneed":
@@ -130,7 +130,7 @@ def update_board_job(
 def close_board_job(
     job_id: str,
     db: Session = Depends(get_db),
-    _admin: User = Depends(get_current_admin_user),
+    _admin_email: str = Depends(get_current_admin),
 ):
     job = db.get(Job, job_id)
     if job is None or job.source != "jobneed":

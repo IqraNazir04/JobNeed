@@ -46,8 +46,10 @@ def auth_headers(client):
 def admin_auth_headers(client, monkeypatch):
     from app.core.config import settings
 
-    monkeypatch.setattr(settings, "admin_email", "admin@example.com")
+    monkeypatch.setattr(settings, "admin_emails", "admin@example.com")
+    monkeypatch.setattr(settings, "admin_password", "admin-secret")
     token = client.post(
-        "/api/auth/register", json={"email": "admin@example.com", "password": "hunter22"}
+        "/api/auth/admin-login",
+        json={"email": "admin@example.com", "password": "admin-secret"},
     ).json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

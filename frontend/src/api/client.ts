@@ -117,13 +117,18 @@ export interface User {
   indeed_url: string;
   upwork_url: string;
   github_username: string;
-  is_admin: boolean;
 }
 
 export interface AuthResponse {
   access_token: string;
   token_type: string;
   user: User;
+}
+
+export interface AdminAuthResponse {
+  access_token: string;
+  token_type: string;
+  email: string;
 }
 
 export interface ProfileUpdate {
@@ -145,14 +150,24 @@ export interface GithubStats {
 }
 
 let authToken: string | null = null;
+let adminToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+// Kept entirely separate from authToken - the job-board admin panel has its
+// own login (POST /auth/admin-login) with no backing user account, so its
+// requests must never pick up whatever regular user happens to be logged
+// into this browser and must keep working if no one is.
+export function setAdminToken(token: string | null) {
+  adminToken = token;
+}
+
+async function request<T>(path: string, options?: RequestInit, tokenOverride?: string | null): Promise<T> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+  const token = tokenOverride !== undefined ? tokenOverride : authToken;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`/api${path}`, { headers, ...options });
   if (!res.ok) {
@@ -184,26 +199,37 @@ export function ingestSample(query = ""): Promise<Job[]> {
   });
 }
 
+export function adminLogin(email: string, password: string): Promise<AdminAuthResponse> {
+  return request("/auth/admin-login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+// Every board call passes adminToken explicitly (third arg) instead of
+// relying on the shared authToken, so these work whether or not a regular
+// user happens to be logged in too.
 export function getMyBoardJobs(): Promise<Job[]> {
-  return request("/jobs/board/mine");
+  return request("/jobs/board/mine", undefined, adminToken);
 }
 
 export function createBoardJob(input: JobBoardInput): Promise<Job> {
-  return request("/jobs/board", { method: "POST", body: JSON.stringify(input) });
+  return request("/jobs/board", { method: "POST", body: JSON.stringify(input) }, adminToken);
 }
 
 export function updateBoardJob(
   id: string,
   input: Partial<JobBoardInput> & { is_active?: boolean }
 ): Promise<Job> {
-  return request(`/jobs/board/${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    body: JSON.stringify(input),
-  });
+  return request(
+    `/jobs/board/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: JSON.stringify(input) },
+    adminToken
+  );
 }
 
 export function closeBoardJob(id: string): Promise<Job> {
-  return request(`/jobs/board/${encodeURIComponent(id)}/close`, { method: "POST" });
+  return request(`/jobs/board/${encodeURIComponent(id)}/close`, { method: "POST" }, adminToken);
 }
 
 export function getJob(id: string): Promise<Job> {

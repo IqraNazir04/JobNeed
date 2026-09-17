@@ -18,7 +18,6 @@ class UserOut(BaseModel):
     indeed_url: str = ""
     upwork_url: str = ""
     github_username: str = ""
-    is_admin: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -27,6 +26,17 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class AdminLoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class AdminTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    email: str
 
 
 class ProfileUpdateRequest(BaseModel):

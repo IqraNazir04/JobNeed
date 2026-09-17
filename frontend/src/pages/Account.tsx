@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { FormEvent, useEffect, useState } from "react";
 import {
+  adminLogin,
   closeBoardJob,
   createBoardJob,
   getGithubStats,
   getMyBoardJobs,
   GithubStats,
   Job,
+  setAdminToken,
   updateBoardJob,
   updateProfile,
 } from "../api/client";
@@ -14,6 +16,13 @@ import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { extractGithubUsername } from "../lib/github";
+
+const ADMIN_TOKEN_KEY = "jobneed:admin-token";
+const ADMIN_EMAIL_KEY = "jobneed:admin-email";
+
+function isAuthError(e: unknown): boolean {
+  return e instanceof Error && (e.message.includes("401") || e.message.includes("403"));
+}
 
 const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
@@ -144,8 +153,76 @@ const EMPTY_BOARD_FORM = {
   url: "",
 };
 
+function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (email: string) => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await adminLogin(email.trim(), password);
+      setAdminToken(res.access_token);
+      try {
+        localStorage.setItem(ADMIN_TOKEN_KEY, res.access_token);
+        localStorage.setItem(ADMIN_EMAIL_KEY, res.email);
+      } catch {
+        // private mode / quota — admin session still works for this tab
+      }
+      onLoggedIn(res.email);
+    } catch {
+      setError("Invalid admin email or password.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+      <div>
+        <h2 className="font-bold text-gray-900 dark:text-gray-50">Job board admin</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Separate from your regular account — log in with the admin email and password to post,
+          edit, or close listings on JobNeed.
+        </p>
+      </div>
+      <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+        <input
+          type="email"
+          required
+          placeholder="Admin email"
+          className={inputClass}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          required
+          placeholder="Admin password"
+          className={inputClass}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="whitespace-nowrap rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? "Checking…" : "Log in"}
+        </button>
+      </form>
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+    </section>
+  );
+}
+
 function JobBoardPanel() {
   const { showToast } = useToast();
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [checkedSession, setCheckedSession] = useState(false);
   const [postings, setPostings] = useState<Job[]>([]);
   const [loadingPostings, setLoadingPostings] = useState(true);
   const [form, setForm] = useState(EMPTY_BOARD_FORM);
@@ -153,15 +230,57 @@ function JobBoardPanel() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function logOutAdmin() {
+    setAdminToken(null);
+    try {
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+      localStorage.removeItem(ADMIN_EMAIL_KEY);
+    } catch {
+      // ignore
+    }
+    setAdminEmail(null);
+    setPostings([]);
+  }
+
   function loadPostings() {
     setLoadingPostings(true);
     getMyBoardJobs()
       .then(setPostings)
-      .catch(() => setError("Couldn't load your postings right now."))
+      .catch((e) => {
+        if (isAuthError(e)) logOutAdmin();
+        else setError("Couldn't load your postings right now.");
+      })
       .finally(() => setLoadingPostings(false));
   }
 
-  useEffect(loadPostings, []);
+  // Restore a persisted admin session on mount — there's no backing user
+  // account to re-fetch, so we optimistically trust the stored token and
+  // let the first request's 401/403 clear it if it's no longer valid.
+  useEffect(() => {
+    let token: string | null = null;
+    let email: string | null = null;
+    try {
+      token = localStorage.getItem(ADMIN_TOKEN_KEY);
+      email = localStorage.getItem(ADMIN_EMAIL_KEY);
+    } catch {
+      // ignore
+    }
+    if (token && email) {
+      setAdminToken(token);
+      setAdminEmail(email);
+    }
+    setCheckedSession(true);
+  }, []);
+
+  useEffect(() => {
+    if (adminEmail) loadPostings();
+  }, [adminEmail]);
+
+  if (!checkedSession) return null;
+
+  if (!adminEmail) {
+    return <AdminLoginForm onLoggedIn={setAdminEmail} />;
+  }
 
   function startEdit(job: Job) {
     setEditingId(job.id);
@@ -206,7 +325,8 @@ function JobBoardPanel() {
       resetForm();
       loadPostings();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save this posting right now.");
+      if (isAuthError(e)) logOutAdmin();
+      else setError(e instanceof Error ? e.message : "Couldn't save this posting right now.");
     } finally {
       setSaving(false);
     }
@@ -217,19 +337,28 @@ function JobBoardPanel() {
       await closeBoardJob(job.id);
       showToast("Posting closed");
       loadPostings();
-    } catch {
-      setError("Couldn't close this posting right now.");
+    } catch (e) {
+      if (isAuthError(e)) logOutAdmin();
+      else setError("Couldn't close this posting right now.");
     }
   }
 
   return (
     <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <div>
-        <h2 className="font-bold text-gray-900 dark:text-gray-50">Job board</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Post a job directly on JobNeed — it's indexed like any other source, so it shows up in
-          Search and the Assistant right alongside Greenhouse, Lever, and the rest.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-bold text-gray-900 dark:text-gray-50">Job board</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Post a job directly on JobNeed — it's indexed like any other source, so it shows up in
+            Search and the Assistant right alongside Greenhouse, Lever, and the rest.
+          </p>
+        </div>
+        <button
+          onClick={logOutAdmin}
+          className="shrink-0 whitespace-nowrap text-xs font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+        >
+          Log out ({adminEmail})
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -535,8 +664,6 @@ function ProfilePanel() {
         </section>
       )}
 
-      {user.is_admin && <JobBoardPanel />}
-
       <button
         onClick={logout}
         className="rounded-xl bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-500/10 dark:hover:text-red-400"
@@ -563,6 +690,7 @@ export function Account() {
         }
       />
       {loading ? null : user ? <ProfilePanel /> : <LoginForm />}
+      <JobBoardPanel />
     </div>
   );
 }
