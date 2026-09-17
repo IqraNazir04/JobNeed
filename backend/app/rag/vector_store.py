@@ -45,6 +45,10 @@ def upsert_jobs(jobs: list[Job]) -> None:
     )
 
 
+def delete_job(job_id: str) -> None:
+    _collection.delete(ids=[job_id])
+
+
 def query(text: str, top_k: int = 10) -> list[tuple[str, float]]:
     """Returns a list of (job_id, similarity_score) sorted by relevance."""
     result = _collection.query(query_texts=[text], n_results=top_k)

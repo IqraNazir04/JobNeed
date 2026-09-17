@@ -40,3 +40,14 @@ def auth_headers(client):
         "/api/auth/register", json={"email": "user@example.com", "password": "hunter22"}
     ).json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def admin_auth_headers(client, monkeypatch):
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "admin_email", "admin@example.com")
+    token = client.post(
+        "/api/auth/register", json={"email": "admin@example.com", "password": "hunter22"}
+    ).json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

@@ -42,5 +42,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7  # 7 days
 
+    # The one account allowed to post to the job board. Single-admin by
+    # design - set to your own account's email in .env.
+    admin_email: str = ""
+
 
 settings = Settings()

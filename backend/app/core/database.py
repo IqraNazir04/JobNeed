@@ -41,3 +41,5 @@ def run_lightweight_migrations() -> None:
     for column in ("linkedin_url", "indeed_url", "upwork_url"):
         _add_column_if_missing(inspector, "users", column, "VARCHAR(512) DEFAULT ''")
     _add_column_if_missing(inspector, "users", "github_username", "VARCHAR(128) DEFAULT ''")
+    _add_column_if_missing(inspector, "jobs", "salary_range", "VARCHAR(128) DEFAULT ''")
+    _add_column_if_missing(inspector, "jobs", "is_active", "BOOLEAN DEFAULT TRUE")

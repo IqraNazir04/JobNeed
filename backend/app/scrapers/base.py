@@ -15,6 +15,8 @@ class RawJob:
     description: str
     url: str
     posted_at: datetime | None = None
+    salary_range: str = ""
+    is_active: bool = True
 
 
 class JobSource(ABC):

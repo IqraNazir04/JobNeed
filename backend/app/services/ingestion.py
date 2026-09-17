@@ -18,6 +18,8 @@ def _upsert(db: Session, raw: RawJob) -> Job:
     job.description = maybe_summarize(raw.description)
     job.url = raw.url
     job.posted_at = raw.posted_at
+    job.salary_range = raw.salary_range
+    job.is_active = raw.is_active
     return job
 
 

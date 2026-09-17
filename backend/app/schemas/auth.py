@@ -18,6 +18,7 @@ class UserOut(BaseModel):
     indeed_url: str = ""
     upwork_url: str = ""
     github_username: str = ""
+    is_admin: bool = False
 
     model_config = {"from_attributes": True}
 

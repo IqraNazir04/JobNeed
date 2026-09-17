@@ -7,6 +7,18 @@ export interface Job {
   description: string;
   url: string;
   posted_at: string | null;
+  salary_range: string;
+  is_active: boolean;
+}
+
+export interface JobBoardInput {
+  title: string;
+  company: string;
+  location: string;
+  remote: boolean;
+  description: string;
+  url: string;
+  salary_range?: string;
 }
 
 export interface SearchResult {
@@ -105,6 +117,7 @@ export interface User {
   indeed_url: string;
   upwork_url: string;
   github_username: string;
+  is_admin: boolean;
 }
 
 export interface AuthResponse {
@@ -169,6 +182,28 @@ export function ingestSample(query = ""): Promise<Job[]> {
   return request(`/jobs/ingest/sample?query=${encodeURIComponent(query)}`, {
     method: "POST",
   });
+}
+
+export function getMyBoardJobs(): Promise<Job[]> {
+  return request("/jobs/board/mine");
+}
+
+export function createBoardJob(input: JobBoardInput): Promise<Job> {
+  return request("/jobs/board", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function updateBoardJob(
+  id: string,
+  input: Partial<JobBoardInput> & { is_active?: boolean }
+): Promise<Job> {
+  return request(`/jobs/board/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function closeBoardJob(id: string): Promise<Job> {
+  return request(`/jobs/board/${encodeURIComponent(id)}/close`, { method: "POST" });
 }
 
 export function getJob(id: string): Promise<Job> {

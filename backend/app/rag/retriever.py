@@ -15,6 +15,8 @@ def retrieve_jobs(db: Session, text: str, top_k: int = 10) -> list[tuple[Job, fl
     results = []
     for job_id, score in hits:
         job = jobs_by_id.get(job_id)
-        if job is not None:
+        # A closed job-board posting is deleted from the vector index right
+        # away, but this guards against a stale hit if that ever lags.
+        if job is not None and job.is_active:
             results.append((job, score))
     return results
