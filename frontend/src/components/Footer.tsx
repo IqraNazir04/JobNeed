@@ -9,7 +9,10 @@ const FEATURE_LINKS = [
   { to: "#tracker", label: "Application Tracker" },
 ];
 
-const ACCOUNT_LINKS = [{ to: "#account", label: "Account" }];
+const ACCOUNT_LINKS = [
+  { to: "#account", label: "Account" },
+  { to: "/admin", label: "Admin" },
+];
 
 export function Footer() {
   return (

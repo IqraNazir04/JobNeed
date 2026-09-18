@@ -133,13 +133,15 @@ shares a password with) any job-seeker account that happens to use the same
 email.
 
 Set `ADMIN_EMAILS` (comma-separated, so more than one person can hold admin
-access) and `ADMIN_PASSWORD` (a single shared secret) in `.env`. In the
-Account section, a "Job board admin" box asks for that email + password,
-separately from the regular Log in / Sign up form above it — logging in
-there requires no user account at all. Once in, a panel appears with a form
-to post, edit, and close listings, plus a list of what's been posted; the
-session persists across reloads via its own token, independent of whether a
-regular user is logged in on the same device.
+access) and `ADMIN_PASSWORD` (a single shared secret) in `.env`. The admin
+panel lives at its own route, **`/admin`** — a genuinely separate page (the
+one spot in the app that isn't a section of the one-pager), reachable via a
+low-key link in the Account section or the footer. It skips the marketing
+hero, marquee, and 3D scene entirely, since an admin's job there is narrow:
+log in with the admin email + password, then post, edit, and close
+listings from a single focused panel. The session persists across reloads
+via its own token, independent of whether a regular user is logged in on
+the same device or browser tab.
 
 A posting goes through the exact same path as a scraped one
 (`services/ingestion.py`'s `ingest_one`) — stored as `source: "jobneed"` and
@@ -183,9 +185,10 @@ Frontend (React, one page) → /api/search, /api/chat → rag/retriever.py + rag
 - **Backend**: FastAPI, SQLAlchemy + Postgres for structured job data, Chroma
   for the vector index, Anthropic's Claude for RAG answers, summarization,
   CV tailoring, interview prep, and speaking feedback.
-- **Frontend**: React + Vite + TypeScript + Tailwind, rendered as a single
-  scrolling page (no router) with a sticky scroll-spy nav, a Three.js hero
-  visual, and section components for each feature.
+- **Frontend**: React + Vite + TypeScript + Tailwind. Almost the whole app
+  is one scrolling page with a sticky scroll-spy nav, a Three.js hero
+  visual, and section components for each feature; `/admin` is the one
+  real route, kept separate via a minimal `react-router-dom` setup.
 
 ## Getting started
 
@@ -228,7 +231,7 @@ backend/
 frontend/
   src/
     api/         # typed fetch client
-    components/  # JobCard, SearchBar, ChatPanel, JobDetailModal, MotivationScene3D, Layout
+    components/  # JobCard, SearchBar, ChatPanel, JobDetailModal, MotivationScene3D, Layout, JobBoardAdmin
     context/     # auth, saved-jobs, job-modal, toast providers shared across sections
-    pages/       # OnePage (composes every section) + one component per feature section
+    pages/       # OnePage (composes every section) + one component per feature section; AdminPage is the one separate route
 ```
