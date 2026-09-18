@@ -42,8 +42,13 @@ export function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (token: string, ema
           onLoggedIn(res.access_token!, res.email!);
         }
       }
-    } catch {
-      setError(pendingToken ? "Invalid authentication code." : "Invalid admin email or password.");
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("401")) {
+        const detail = err.message.split(" — ")[1];
+        setError(detail || (pendingToken ? "Invalid authentication code." : "Invalid admin email or password."));
+      } else {
+        setError("Couldn't reach the server — check that the backend is running and try again.");
+      }
     } finally {
       setLoading(false);
     }

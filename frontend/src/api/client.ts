@@ -184,7 +184,14 @@ async function request<T>(path: string, options?: RequestInit, tokenOverride?: s
 
   const res = await fetch(`/api${path}`, { headers, ...options });
   if (!res.ok) {
-    throw new Error(`Request to ${path} failed: ${res.status}`);
+    let detail = "";
+    try {
+      const body = await res.json();
+      if (typeof body?.detail === "string") detail = body.detail;
+    } catch {
+      // no JSON body — the status code alone still gets through below
+    }
+    throw new Error(`Request to ${path} failed: ${res.status}${detail ? ` — ${detail}` : ""}`);
   }
   if (res.status === 204) {
     return undefined as T;
