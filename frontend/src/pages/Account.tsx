@@ -183,7 +183,7 @@ function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (email: string) => void })
   return (
     <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
       <div>
-        <h2 className="font-bold text-gray-900 dark:text-gray-50">Job board admin</h2>
+        <h2 className="font-bold text-gray-900 dark:text-gray-50">Admin</h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Separate from your regular account — log in with the admin email and password to post,
           edit, or close listings on JobNeed.
