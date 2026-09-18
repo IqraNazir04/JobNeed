@@ -135,13 +135,17 @@ def test_admin_token_cannot_be_used_as_a_regular_user_token(client, admin_auth_h
     assert res.status_code == 401
 
 
-def test_valid_admin_token_gets_403_once_removed_from_allowlist(client, admin_auth_headers, monkeypatch):
-    """A well-formed admin session token that's no longer on the allowlist
-    (e.g. ADMIN_EMAILS changed after it was issued) is the one case that
-    should read as 403 rather than 401 - it's a real admin token, just for
-    an email that isn't allowed anymore."""
-    from app.core.config import settings
+def test_valid_admin_token_gets_403_once_account_is_removed(client, admin_auth_headers):
+    """A well-formed admin session token for an account that's since been
+    deleted is the one case that should read as 403 rather than 401 - it's
+    a real admin token, just for an account that no longer exists."""
+    from app.core.database import SessionLocal
+    from app.models.admin import AdminAccount
 
-    monkeypatch.setattr(settings, "admin_emails", "someone-else@example.com")
+    db = SessionLocal()
+    db.query(AdminAccount).filter(AdminAccount.email == "admin@example.com").delete()
+    db.commit()
+    db.close()
+
     res = client.get("/api/jobs/board/mine", headers=admin_auth_headers)
     assert res.status_code == 403

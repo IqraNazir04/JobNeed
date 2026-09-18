@@ -1,21 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
-import {
-  adminLogin,
-  closeBoardJob,
-  createBoardJob,
-  getMyBoardJobs,
-  Job,
-  setAdminToken,
-  updateBoardJob,
-} from "../api/client";
+import { adminLogin, adminLoginTotp, closeBoardJob, createBoardJob, getMyBoardJobs, Job, updateBoardJob } from "../api/client";
 import { useToast } from "../context/ToastContext";
-
-const ADMIN_TOKEN_KEY = "jobneed:admin-token";
-const ADMIN_EMAIL_KEY = "jobneed:admin-email";
-
-function isAuthError(e: unknown): boolean {
-  return e instanceof Error && (e.message.includes("401") || e.message.includes("403"));
-}
+import { isAuthError } from "../hooks/useAdminSession";
 
 const inputClass =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
@@ -31,9 +17,11 @@ const EMPTY_BOARD_FORM = {
   url: "",
 };
 
-function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (email: string) => void }) {
+export function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (token: string, email: string) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,20 +30,66 @@ function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (email: string) => void })
     setLoading(true);
     setError(null);
     try {
-      const res = await adminLogin(email.trim(), password);
-      setAdminToken(res.access_token);
-      try {
-        localStorage.setItem(ADMIN_TOKEN_KEY, res.access_token);
-        localStorage.setItem(ADMIN_EMAIL_KEY, res.email);
-      } catch {
-        // private mode / quota — admin session still works for this tab
+      if (pendingToken) {
+        const res = await adminLoginTotp(pendingToken, code.trim());
+        onLoggedIn(res.access_token!, res.email!);
+      } else {
+        const res = await adminLogin(email.trim(), password);
+        if (res.requires_totp) {
+          setPendingToken(res.pending_token);
+          setCode("");
+        } else {
+          onLoggedIn(res.access_token!, res.email!);
+        }
       }
-      onLoggedIn(res.email);
     } catch {
-      setError("Invalid admin email or password.");
+      setError(pendingToken ? "Invalid authentication code." : "Invalid admin email or password.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (pendingToken) {
+    return (
+      <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+        <div>
+          <h2 className="font-bold text-gray-900 dark:text-gray-50">Two-factor code</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Enter the 6-digit code from your authenticator app.
+          </p>
+        </div>
+        <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-[1fr_auto]">
+          <input
+            type="text"
+            inputMode="numeric"
+            autoFocus
+            required
+            placeholder="123456"
+            className={inputClass}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="whitespace-nowrap rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? "Checking…" : "Verify"}
+          </button>
+        </form>
+        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        <button
+          type="button"
+          onClick={() => {
+            setPendingToken(null);
+            setError(null);
+          }}
+          className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          ← Start over
+        </button>
+      </section>
+    );
   }
 
   return (
@@ -98,15 +132,19 @@ function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (email: string) => void })
 }
 
 /**
- * The job board's whole admin surface: its own login gate plus the
- * post/edit/close panel once authenticated. Deliberately self-contained
- * (own session handling, own styles) so it can be dropped onto its own
- * page without pulling in anything from the rest of the site.
+ * The job-posting side of the admin panel: create/edit/close listings.
+ * Session state (who's logged in) lives in useAdminSession, shared with
+ * AdminAccountSettings, so a password change or logout there is reflected
+ * here immediately too.
  */
-export function JobBoardAdmin() {
+export function JobBoardAdmin({
+  adminEmail,
+  onLoggedOut,
+}: {
+  adminEmail: string;
+  onLoggedOut: () => void;
+}) {
   const { showToast } = useToast();
-  const [adminEmail, setAdminEmail] = useState<string | null>(null);
-  const [checkedSession, setCheckedSession] = useState(false);
   const [postings, setPostings] = useState<Job[]>([]);
   const [loadingPostings, setLoadingPostings] = useState(true);
   const [form, setForm] = useState(EMPTY_BOARD_FORM);
@@ -114,57 +152,19 @@ export function JobBoardAdmin() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function logOutAdmin() {
-    setAdminToken(null);
-    try {
-      localStorage.removeItem(ADMIN_TOKEN_KEY);
-      localStorage.removeItem(ADMIN_EMAIL_KEY);
-    } catch {
-      // ignore
-    }
-    setAdminEmail(null);
-    setPostings([]);
-  }
-
   function loadPostings() {
     setLoadingPostings(true);
     getMyBoardJobs()
       .then(setPostings)
       .catch((e) => {
-        if (isAuthError(e)) logOutAdmin();
+        if (isAuthError(e)) onLoggedOut();
         else setError("Couldn't load your postings right now.");
       })
       .finally(() => setLoadingPostings(false));
   }
 
-  // Restore a persisted admin session on mount — there's no backing user
-  // account to re-fetch, so we optimistically trust the stored token and
-  // let the first request's 401/403 clear it if it's no longer valid.
-  useEffect(() => {
-    let token: string | null = null;
-    let email: string | null = null;
-    try {
-      token = localStorage.getItem(ADMIN_TOKEN_KEY);
-      email = localStorage.getItem(ADMIN_EMAIL_KEY);
-    } catch {
-      // ignore
-    }
-    if (token && email) {
-      setAdminToken(token);
-      setAdminEmail(email);
-    }
-    setCheckedSession(true);
-  }, []);
-
-  useEffect(() => {
-    if (adminEmail) loadPostings();
-  }, [adminEmail]);
-
-  if (!checkedSession) return null;
-
-  if (!adminEmail) {
-    return <AdminLoginForm onLoggedIn={setAdminEmail} />;
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(loadPostings, []);
 
   function startEdit(job: Job) {
     setEditingId(job.id);
@@ -209,7 +209,7 @@ export function JobBoardAdmin() {
       resetForm();
       loadPostings();
     } catch (e) {
-      if (isAuthError(e)) logOutAdmin();
+      if (isAuthError(e)) onLoggedOut();
       else setError(e instanceof Error ? e.message : "Couldn't save this posting right now.");
     } finally {
       setSaving(false);
@@ -222,7 +222,7 @@ export function JobBoardAdmin() {
       showToast("Posting closed");
       loadPostings();
     } catch (e) {
-      if (isAuthError(e)) logOutAdmin();
+      if (isAuthError(e)) onLoggedOut();
       else setError("Couldn't close this posting right now.");
     }
   }
@@ -238,7 +238,7 @@ export function JobBoardAdmin() {
           </p>
         </div>
         <button
-          onClick={logOutAdmin}
+          onClick={onLoggedOut}
           className="shrink-0 whitespace-nowrap text-xs font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
         >
           Log out ({adminEmail})

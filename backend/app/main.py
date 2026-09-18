@@ -9,11 +9,18 @@ from slowapi.middleware import SlowAPIMiddleware
 import app.models  # noqa: F401 - registers all models on Base.metadata
 from app.api.routes import auth, chat, cv, interview, jobs, saved_jobs, search, speaking
 from app.core.config import settings
-from app.core.database import Base, engine, run_lightweight_migrations
+from app.core.database import Base, SessionLocal, engine, run_lightweight_migrations
 from app.core.rate_limit import limiter
+from app.services.admin_bootstrap import ensure_bootstrap_admins
 
 Base.metadata.create_all(bind=engine)
 run_lightweight_migrations()
+
+_bootstrap_db = SessionLocal()
+try:
+    ensure_bootstrap_admins(_bootstrap_db)
+finally:
+    _bootstrap_db.close()
 
 if settings.jwt_secret_key == "dev-insecure-secret-change-me-in-your-own-dotenv-file":
     logging.getLogger("uvicorn.error").warning(

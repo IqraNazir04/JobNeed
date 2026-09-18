@@ -42,12 +42,25 @@ def auth_headers(client):
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest.fixture()
-def admin_auth_headers(client, monkeypatch):
-    from app.core.config import settings
+def make_admin_account(email: str = "admin@example.com", password: str = "admin-secret"):
+    """Inserts an AdminAccount row directly, bypassing the (already-admin-
+    only) /admin-accounts endpoint - tests need a way to create the very
+    first admin without a chicken-and-egg problem."""
+    from app.core.database import SessionLocal
+    from app.core.security import hash_password
+    from app.models.admin import AdminAccount
 
-    monkeypatch.setattr(settings, "admin_emails", "admin@example.com")
-    monkeypatch.setattr(settings, "admin_password", "admin-secret")
+    db = SessionLocal()
+    try:
+        db.add(AdminAccount(email=email, hashed_password=hash_password(password)))
+        db.commit()
+    finally:
+        db.close()
+
+
+@pytest.fixture()
+def admin_auth_headers(client):
+    make_admin_account("admin@example.com", "admin-secret")
     token = client.post(
         "/api/auth/admin-login",
         json={"email": "admin@example.com", "password": "admin-secret"},

@@ -126,9 +126,22 @@ export interface AuthResponse {
 }
 
 export interface AdminAuthResponse {
-  access_token: string;
+  requires_totp: boolean;
+  access_token: string | null;
   token_type: string;
+  email: string | null;
+  pending_token: string | null;
+}
+
+export interface AdminAccount {
   email: string;
+  totp_enabled: boolean;
+  created_at: string;
+}
+
+export interface AdminTotpSetup {
+  secret: string;
+  otpauth_url: string;
 }
 
 export interface ProfileUpdate {
@@ -206,9 +219,62 @@ export function adminLogin(email: string, password: string): Promise<AdminAuthRe
   });
 }
 
-// Every board call passes adminToken explicitly (third arg) instead of
-// relying on the shared authToken, so these work whether or not a regular
-// user happens to be logged in too.
+export function adminLoginTotp(pendingToken: string, code: string): Promise<AdminAuthResponse> {
+  return request("/auth/admin-login/totp", {
+    method: "POST",
+    body: JSON.stringify({ pending_token: pendingToken, code }),
+  });
+}
+
+// Every admin-authenticated call below passes adminToken explicitly (last
+// arg) instead of relying on the shared authToken, so these work whether or
+// not a regular user happens to be logged in too.
+export function listAdminAccounts(): Promise<AdminAccount[]> {
+  return request("/auth/admin-accounts", undefined, adminToken);
+}
+
+export function addAdminAccount(email: string, password: string): Promise<AdminAccount> {
+  return request(
+    "/auth/admin-accounts",
+    { method: "POST", body: JSON.stringify({ email, password }) },
+    adminToken
+  );
+}
+
+export function removeAdminAccount(email: string): Promise<void> {
+  return request(`/auth/admin-accounts/${encodeURIComponent(email)}`, { method: "DELETE" }, adminToken);
+}
+
+export function changeAdminPassword(currentPassword: string, newPassword: string): Promise<void> {
+  return request(
+    "/auth/admin-password",
+    {
+      method: "POST",
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    },
+    adminToken
+  );
+}
+
+export function setupAdminTotp(): Promise<AdminTotpSetup> {
+  return request("/auth/admin-totp/setup", { method: "POST" }, adminToken);
+}
+
+export function confirmAdminTotp(code: string): Promise<void> {
+  return request(
+    "/auth/admin-totp/confirm",
+    { method: "POST", body: JSON.stringify({ code }) },
+    adminToken
+  );
+}
+
+export function disableAdminTotp(password: string): Promise<void> {
+  return request(
+    "/auth/admin-totp/disable",
+    { method: "POST", body: JSON.stringify({ password }) },
+    adminToken
+  );
+}
 export function getMyBoardJobs(): Promise<Job[]> {
   return request("/jobs/board/mine", undefined, adminToken);
 }

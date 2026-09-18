@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
-import { JobBoardAdmin } from "../components/JobBoardAdmin";
+import { AdminAccountSettings } from "../components/AdminAccountSettings";
+import { AdminLoginForm, JobBoardAdmin } from "../components/JobBoardAdmin";
 import { Logo } from "../components/Logo";
+import { useAdminSession } from "../hooks/useAdminSession";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { usePageMeta } from "../hooks/usePageMeta";
 
@@ -13,6 +15,7 @@ import { usePageMeta } from "../hooks/usePageMeta";
 export function AdminPage() {
   usePageMeta("Admin", "Manage JobNeed's job board listings.");
   const { dark, toggleDark } = useDarkMode();
+  const { adminEmail, checkedSession, persist, logOut } = useAdminSession();
 
   return (
     <div className="flex min-h-screen flex-col bg-paper dark:bg-paper-dark">
@@ -61,7 +64,13 @@ export function AdminPage() {
             accounts.
           </p>
         </div>
-        <JobBoardAdmin />
+        {checkedSession && !adminEmail && <AdminLoginForm onLoggedIn={persist} />}
+        {checkedSession && adminEmail && (
+          <>
+            <JobBoardAdmin adminEmail={adminEmail} onLoggedOut={logOut} />
+            <AdminAccountSettings adminEmail={adminEmail} onLoggedOut={logOut} />
+          </>
+        )}
       </main>
     </div>
   );

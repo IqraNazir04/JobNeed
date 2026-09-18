@@ -127,21 +127,30 @@ by title/description. Import a single posting with `POST /api/jobs/import-url`.
 
 Beyond aggregating other sites, JobNeed can host original postings of its
 own — and the admin panel is deliberately **decoupled from regular user
-accounts**: it's its own login, with its own password, checked against
-`.env`, not the `users` table. An admin's access never depends on (or
-shares a password with) any job-seeker account that happens to use the same
-email.
+accounts**: its own `admin_accounts` table, its own login, its own
+passwords. An admin's access never depends on (or shares a password with)
+any job-seeker account that happens to use the same email.
 
-Set `ADMIN_EMAILS` (comma-separated, so more than one person can hold admin
-access) and `ADMIN_PASSWORD` (a single shared secret) in `.env`. The admin
-panel lives at its own route, **`/admin`** — a genuinely separate page (the
-one spot in the app that isn't a section of the one-pager), reachable via a
-low-key link in the Account section or the footer. It skips the marketing
-hero, marquee, and 3D scene entirely, since an admin's job there is narrow:
-log in with the admin email + password, then post, edit, and close
-listings from a single focused panel. The session persists across reloads
-via its own token, independent of whether a regular user is logged in on
-the same device or browser tab.
+`ADMIN_EMAILS` (comma-separated) and `ADMIN_PASSWORD` in `.env` only *seed*
+the first admin row(s) on startup — from then on the database is the
+source of truth, managed entirely from the panel itself:
+
+- **Multiple admins** — add or remove admin accounts from the panel (the
+  last remaining admin can't be removed, so you can't lock yourself out).
+- **Change your own password** at any time, independent of `.env`.
+- **Two-factor authentication** — enable TOTP (Google Authenticator, Authy,
+  1Password, etc.) with a scannable QR code; login then becomes a two-step
+  flow (password, then a 6-digit code) using a short-lived pending token
+  that's cryptographically distinct from a full session token, so it can't
+  be used to skip the second step.
+
+The panel lives at its own route, **`/admin`** — a genuinely separate page
+(the one spot in the app that isn't a section of the one-pager), reachable
+via a low-key link in the Account section or the footer. It skips the
+marketing hero, marquee, and 3D scene entirely, since an admin's job there
+is narrow. The session persists across reloads via its own token,
+independent of whether a regular user is logged in on the same device or
+browser tab.
 
 A posting goes through the exact same path as a scraped one
 (`services/ingestion.py`'s `ingest_one`) — stored as `source: "jobneed"` and
@@ -151,13 +160,17 @@ posting removes it from the vector index right away
 (`rag/vector_store.delete_job`) so it stops surfacing in search, while the
 row itself stays in Postgres for your own records.
 
-Endpoints: `POST /api/auth/admin-login` (issues an admin session token,
-subject-prefixed `admin:` so it's never mistaken for a regular user token),
-`POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}` (edit),
-`POST /api/jobs/board/{id}/close`, `GET /api/jobs/board/mine` — the latter
-four require a valid admin token (401 with none/invalid, 403 if the email
-was since removed from `ADMIN_EMAILS`) and are scoped to `source ==
-"jobneed"` so they can't touch a scraped posting.
+Endpoints: `POST /api/auth/admin-login` (password step; returns either a
+session token or, if 2FA is on, a short-lived `pending_token`),
+`POST /api/auth/admin-login/totp` (second step), `GET/POST /api/auth/admin-accounts`
++ `DELETE /api/auth/admin-accounts/{email}` (manage admins), `POST /api/auth/admin-password`,
+`POST /api/auth/admin-totp/setup|confirm|disable`, and the job-board CRUD
+itself — `POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}`
+(edit), `POST /api/jobs/board/{id}/close`, `GET /api/jobs/board/mine`.
+Every one of these (bar the two login steps) requires a valid admin session
+token — 401 with none/invalid, 403 if the account behind a *valid* token
+was since deleted — and job-board writes are scoped to `source == "jobneed"`
+so they can't touch a scraped posting.
 
 ## Security notes
 
@@ -231,7 +244,7 @@ backend/
 frontend/
   src/
     api/         # typed fetch client
-    components/  # JobCard, SearchBar, ChatPanel, JobDetailModal, MotivationScene3D, Layout, JobBoardAdmin
+    components/  # JobCard, SearchBar, ChatPanel, JobDetailModal, MotivationScene3D, Layout, JobBoardAdmin, AdminAccountSettings
     context/     # auth, saved-jobs, job-modal, toast providers shared across sections
     pages/       # OnePage (composes every section) + one component per feature section; AdminPage is the one separate route
 ```
