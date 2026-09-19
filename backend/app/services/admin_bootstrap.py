@@ -16,5 +16,14 @@ def ensure_bootstrap_admins(db: Session) -> None:
     for email in settings.admin_email_set:
         exists = db.query(AdminAccount).filter(AdminAccount.email == email).first()
         if exists is None:
-            db.add(AdminAccount(email=email, hashed_password=hash_password(settings.admin_password)))
+            # Bootstrapped accounts get full "admin" role, not the "editor"
+            # default new accounts get elsewhere - these are the founding
+            # admins from .env, so they should start with full access.
+            db.add(
+                AdminAccount(
+                    email=email,
+                    hashed_password=hash_password(settings.admin_password),
+                    role="admin",
+                )
+            )
     db.commit()

@@ -18,6 +18,13 @@ class AdminAccount(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
 
+    # "admin" can manage other admin accounts and roles, plus view/remove
+    # regular user accounts; "editor" can do everything else (post/edit/
+    # close job board listings, view the dashboard) but not those two.
+    # New admins default to "editor" - granting full "admin" is an explicit
+    # choice, not the path of least resistance.
+    role: Mapped[str] = mapped_column(String(20), default="editor")
+
     # TOTP-based two-factor auth (RFC 6238 - Google Authenticator, Authy, etc.).
     # totp_secret is generated at "setup" time but totp_enabled stays False
     # until the admin proves they can produce a valid code with it, so a

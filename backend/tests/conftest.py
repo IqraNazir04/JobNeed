@@ -42,17 +42,19 @@ def auth_headers(client):
     return {"Authorization": f"Bearer {token}"}
 
 
-def make_admin_account(email: str = "admin@example.com", password: str = "admin-secret"):
+def make_admin_account(email: str = "admin@example.com", password: str = "admin-secret", role: str = "admin"):
     """Inserts an AdminAccount row directly, bypassing the (already-admin-
     only) /admin-accounts endpoint - tests need a way to create the very
-    first admin without a chicken-and-egg problem."""
+    first admin without a chicken-and-egg problem. Defaults to the "admin"
+    role (full access) since that's what most existing tests assume;
+    role-specific tests pass role="editor" explicitly."""
     from app.core.database import SessionLocal
     from app.core.security import hash_password
     from app.models.admin import AdminAccount
 
     db = SessionLocal()
     try:
-        db.add(AdminAccount(email=email, hashed_password=hash_password(password)))
+        db.add(AdminAccount(email=email, hashed_password=hash_password(password), role=role))
         db.commit()
     finally:
         db.close()

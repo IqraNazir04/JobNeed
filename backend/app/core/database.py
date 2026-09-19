@@ -43,3 +43,10 @@ def run_lightweight_migrations() -> None:
     _add_column_if_missing(inspector, "users", "github_username", "VARCHAR(128) DEFAULT ''")
     _add_column_if_missing(inspector, "jobs", "salary_range", "VARCHAR(128) DEFAULT ''")
     _add_column_if_missing(inspector, "jobs", "is_active", "BOOLEAN DEFAULT TRUE")
+    # Existing admin_accounts rows predate the role column entirely - default
+    # them to 'admin' (their original, only level of access) rather than the
+    # model's 'editor' default for brand-new signups, so this migration
+    # never quietly demotes someone who already had full access.
+    _add_column_if_missing(inspector, "admin_accounts", "role", "VARCHAR(20) DEFAULT 'admin'")
+    _add_column_if_missing(inspector, "blog_posts", "image_url", "VARCHAR(1024) DEFAULT ''")
+    _add_column_if_missing(inspector, "blog_posts", "tags", "VARCHAR(512) DEFAULT ''")

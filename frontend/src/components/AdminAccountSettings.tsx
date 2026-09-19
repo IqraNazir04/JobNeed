@@ -3,12 +3,14 @@ import { FormEvent, useEffect, useState } from "react";
 import {
   addAdminAccount,
   AdminAccount,
+  AdminRole,
   changeAdminPassword,
   confirmAdminTotp,
   disableAdminTotp,
   listAdminAccounts,
   removeAdminAccount,
   setupAdminTotp,
+  updateAdminRole,
 } from "../api/client";
 import { useToast } from "../context/ToastContext";
 import { isAuthError } from "../hooks/useAdminSession";
@@ -226,29 +228,35 @@ function TwoFactorSection({
 function AdminAccountsList({
   accounts,
   selfEmail,
+  isAdmin,
   onChanged,
   onLoggedOut,
 }: {
   accounts: AdminAccount[];
   selfEmail: string;
+  isAdmin: boolean;
   onChanged: () => void;
   onLoggedOut: () => void;
 }) {
   const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<AdminRole>("editor");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const adminRoleCount = accounts.filter((a) => a.role === "admin").length;
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     try {
-      await addAdminAccount(email.trim(), password);
+      await addAdminAccount(email.trim(), password, role);
       showToast("Admin added");
       setEmail("");
       setPassword("");
+      setRole("editor");
       onChanged();
     } catch (e) {
       if (isAuthError(e)) onLoggedOut();
@@ -266,7 +274,18 @@ function AdminAccountsList({
       onChanged();
     } catch (e) {
       if (isAuthError(e)) onLoggedOut();
-      else setError("Couldn't remove that admin right now.");
+      else setError(e instanceof Error ? e.message.split(" — ")[1] || "Couldn't remove that admin right now." : "Couldn't remove that admin right now.");
+    }
+  }
+
+  async function handleRoleChange(target: string, nextRole: AdminRole) {
+    try {
+      await updateAdminRole(target, nextRole);
+      showToast("Role updated");
+      onChanged();
+    } catch (e) {
+      if (isAuthError(e)) onLoggedOut();
+      else setError(e instanceof Error ? e.message.split(" — ")[1] || "Couldn't change that admin's role." : "Couldn't change that admin's role.");
     }
   }
 
@@ -282,46 +301,76 @@ function AdminAccountsList({
               {a.email} {a.email === selfEmail && <span className="text-gray-400">(you)</span>}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-500">
-              {a.totp_enabled ? "Two-factor on" : "Two-factor off"}
+              {a.role === "admin" ? "Admin" : "Editor"} · {a.totp_enabled ? "Two-factor on" : "Two-factor off"}
             </p>
           </div>
-          {accounts.length > 1 && (
-            <button
-              onClick={() => handleRemove(a.email)}
-              className="shrink-0 text-xs font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
-            >
-              Remove
-            </button>
+          {isAdmin && (
+            <div className="flex shrink-0 items-center gap-3">
+              <select
+                value={a.role}
+                onChange={(e) => handleRoleChange(a.email, e.target.value as AdminRole)}
+                disabled={a.role === "admin" && adminRoleCount <= 1}
+                className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              >
+                <option value="editor">Editor</option>
+                <option value="admin">Admin</option>
+              </select>
+              {accounts.length > 1 && (
+                <button
+                  onClick={() => handleRemove(a.email)}
+                  className="text-xs font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
           )}
         </div>
       ))}
 
-      <form onSubmit={handleAdd} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <div>
-          <label className={labelClass}>New admin email</label>
-          <input
-            type="email"
-            required
-            className={inputClass}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Password</label>
-          <input
-            type="password"
-            required
-            minLength={8}
-            className={inputClass}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit" disabled={saving} className={`whitespace-nowrap ${buttonClass}`}>
-          {saving ? "Adding…" : "Add admin"}
-        </button>
-      </form>
+      {isAdmin ? (
+        <form onSubmit={handleAdd} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+          <div>
+            <label className={labelClass}>New admin email</label>
+            <input
+              type="email"
+              required
+              className={inputClass}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Password</label>
+            <input
+              type="password"
+              required
+              minLength={8}
+              className={inputClass}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Role</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as AdminRole)}
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+            >
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" disabled={saving} className={`whitespace-nowrap ${buttonClass}`}>
+            {saving ? "Adding…" : "Add admin"}
+          </button>
+        </form>
+      ) : (
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Only accounts with the admin role can add, remove, or change roles for other admins.
+        </p>
+      )}
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
@@ -329,9 +378,11 @@ function AdminAccountsList({
 
 export function AdminAccountSettings({
   adminEmail,
+  adminRole,
   onLoggedOut,
 }: {
   adminEmail: string;
+  adminRole: AdminRole;
   onLoggedOut: () => void;
 }) {
   const [accounts, setAccounts] = useState<AdminAccount[] | null>(null);
@@ -387,6 +438,7 @@ export function AdminAccountSettings({
           <AdminAccountsList
             accounts={accounts}
             selfEmail={adminEmail}
+            isAdmin={adminRole === "admin"}
             onChanged={reload}
             onLoggedOut={onLoggedOut}
           />

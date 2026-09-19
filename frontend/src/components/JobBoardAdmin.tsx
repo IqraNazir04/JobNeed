@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { adminLogin, adminLoginTotp, closeBoardJob, createBoardJob, getMyBoardJobs, Job, updateBoardJob } from "../api/client";
+import { AdminRole, adminLogin, adminLoginTotp, closeBoardJob, createBoardJob, getMyBoardJobs, Job, updateBoardJob } from "../api/client";
 import { useToast } from "../context/ToastContext";
 import { isAuthError } from "../hooks/useAdminSession";
 
@@ -17,7 +17,11 @@ const EMPTY_BOARD_FORM = {
   url: "",
 };
 
-export function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (token: string, email: string) => void }) {
+export function AdminLoginForm({
+  onLoggedIn,
+}: {
+  onLoggedIn: (token: string, email: string, role: AdminRole) => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -32,14 +36,14 @@ export function AdminLoginForm({ onLoggedIn }: { onLoggedIn: (token: string, ema
     try {
       if (pendingToken) {
         const res = await adminLoginTotp(pendingToken, code.trim());
-        onLoggedIn(res.access_token!, res.email!);
+        onLoggedIn(res.access_token!, res.email!, res.role!);
       } else {
         const res = await adminLogin(email.trim(), password);
         if (res.requires_totp) {
           setPendingToken(res.pending_token);
           setCode("");
         } else {
-          onLoggedIn(res.access_token!, res.email!);
+          onLoggedIn(res.access_token!, res.email!, res.role!);
         }
       }
     } catch (err) {

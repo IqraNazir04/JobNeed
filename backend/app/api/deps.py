@@ -28,16 +28,16 @@ ADMIN_SUBJECT_PREFIX = "admin:"
 ADMIN_PENDING_SUBJECT_PREFIX = "admin-pending:"
 
 
-def get_current_admin(
+def get_current_admin_account(
     authorization: str | None = Header(default=None),
     db: Session = Depends(get_db),
-) -> str:
+) -> AdminAccount:
     """Validates the job-board admin panel's own session token - entirely
     separate from regular user auth (POST /auth/admin-login), so admin
     access never depends on a `users` row or its password. Checked against
     the admin_accounts table (not just a static allowlist) so adding or
     removing an admin takes effect immediately, without restarting the
-    server. Returns the authenticated admin's email."""
+    server. Returns the full account (email + role)."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -49,4 +49,20 @@ def get_current_admin(
     admin = db.query(AdminAccount).filter(AdminAccount.email == email).first()
     if admin is None:
         raise HTTPException(status_code=403, detail="Admin access required")
-    return email
+    return admin
+
+
+def get_current_admin(account: AdminAccount = Depends(get_current_admin_account)) -> str:
+    """Same as get_current_admin_account, but for the (more common) case
+    where a route only needs to know who's logged in, not their role."""
+    return account.email
+
+
+def require_admin_role(account: AdminAccount = Depends(get_current_admin_account)) -> AdminAccount:
+    """Gates actions reserved for full admins: managing other admin
+    accounts/roles, and viewing/removing regular user accounts. An "editor"
+    can do everything else (job board CRUD, the dashboard, their own
+    password/2FA) but not these."""
+    if account.role != "admin":
+        raise HTTPException(status_code=403, detail="This requires the admin role, not editor.")
+    return account

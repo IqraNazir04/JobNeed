@@ -125,18 +125,90 @@ export interface AuthResponse {
   user: User;
 }
 
+export type AdminRole = "admin" | "editor";
+
 export interface AdminAuthResponse {
   requires_totp: boolean;
   access_token: string | null;
   token_type: string;
   email: string | null;
+  role: AdminRole | null;
   pending_token: string | null;
 }
 
 export interface AdminAccount {
   email: string;
+  role: AdminRole;
   totp_enabled: boolean;
   created_at: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  author_email: string;
+  image_url: string;
+  tags: string;
+  published: boolean;
+  scheduled_for: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlogPostInput {
+  title: string;
+  content: string;
+  image_url: string;
+  tags: string;
+  published: boolean;
+  scheduled_for: string | null;
+}
+
+export interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  display_order: number;
+  created_at: string;
+}
+
+export interface SocialLinkInput {
+  platform: string;
+  url: string;
+  display_order: number;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  created_at: string;
+  linkedin_url: string;
+  github_username: string;
+}
+
+export interface ActivityItem {
+  type: "job_posted" | "user_signup";
+  label: string;
+  timestamp: string;
+}
+
+export interface AdminDashboard {
+  total_jobs_indexed: number;
+  active_board_postings: number;
+  total_users: number;
+  total_admins: number;
+  recent_activity: ActivityItem[];
+}
+
+export interface ChartSeriesPoint {
+  date: string;
+  jobs_posted: number;
+  user_signups: number;
+}
+
+export interface DashboardChart {
+  series: ChartSeriesPoint[];
 }
 
 export interface AdminTotpSetup {
@@ -240,16 +312,24 @@ export function listAdminAccounts(): Promise<AdminAccount[]> {
   return request("/auth/admin-accounts", undefined, adminToken);
 }
 
-export function addAdminAccount(email: string, password: string): Promise<AdminAccount> {
+export function addAdminAccount(email: string, password: string, role: AdminRole = "editor"): Promise<AdminAccount> {
   return request(
     "/auth/admin-accounts",
-    { method: "POST", body: JSON.stringify({ email, password }) },
+    { method: "POST", body: JSON.stringify({ email, password, role }) },
     adminToken
   );
 }
 
 export function removeAdminAccount(email: string): Promise<void> {
   return request(`/auth/admin-accounts/${encodeURIComponent(email)}`, { method: "DELETE" }, adminToken);
+}
+
+export function updateAdminRole(email: string, role: AdminRole): Promise<AdminAccount> {
+  return request(
+    `/auth/admin-accounts/${encodeURIComponent(email)}/role`,
+    { method: "PATCH", body: JSON.stringify({ role }) },
+    adminToken
+  );
 }
 
 export function changeAdminPassword(currentPassword: string, newPassword: string): Promise<void> {
@@ -399,4 +479,91 @@ export function getSpeakingFeedback(
     method: "POST",
     body: JSON.stringify({ question, transcript }),
   });
+}
+
+export function getAdminDashboard(): Promise<AdminDashboard> {
+  return request("/auth/admin-dashboard", undefined, adminToken);
+}
+
+export function getAdminDashboardChart(): Promise<DashboardChart> {
+  return request("/admin/dashboard/chart-data", undefined, adminToken);
+}
+
+export function listAdminUsers(): Promise<AdminUser[]> {
+  return request("/auth/users", undefined, adminToken);
+}
+
+export function deleteAdminUser(id: string): Promise<void> {
+  return request(`/auth/users/${encodeURIComponent(id)}`, { method: "DELETE" }, adminToken);
+}
+
+export function listPosts(): Promise<BlogPost[]> {
+  return request("/admin/posts", undefined, adminToken);
+}
+
+export function createPost(input: BlogPostInput): Promise<BlogPost> {
+  return request("/admin/posts", { method: "POST", body: JSON.stringify(input) }, adminToken);
+}
+
+export function updatePost(id: string, input: BlogPostInput): Promise<BlogPost> {
+  return request(
+    `/admin/posts/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: JSON.stringify(input) },
+    adminToken
+  );
+}
+
+export function deletePost(id: string): Promise<void> {
+  return request(`/admin/posts/${encodeURIComponent(id)}`, { method: "DELETE" }, adminToken);
+}
+
+export function listSocialLinks(): Promise<SocialLink[]> {
+  return request("/admin/social-links", undefined, adminToken);
+}
+
+export function createSocialLink(input: SocialLinkInput): Promise<SocialLink> {
+  return request("/admin/social-links", { method: "POST", body: JSON.stringify(input) }, adminToken);
+}
+
+export function updateSocialLink(id: string, input: SocialLinkInput): Promise<SocialLink> {
+  return request(
+    `/admin/social-links/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: JSON.stringify(input) },
+    adminToken
+  );
+}
+
+export function deleteSocialLink(id: string): Promise<void> {
+  return request(`/admin/social-links/${encodeURIComponent(id)}`, { method: "DELETE" }, adminToken);
+}
+
+// Bypasses request() entirely — a file upload needs a multipart body, but
+// request() always sets Content-Type: application/json, which would break it.
+export async function uploadBlogImage(file: File): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/admin/posts/upload-image", {
+    method: "POST",
+    headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const body = await res.json();
+      if (typeof body?.detail === "string") detail = body.detail;
+    } catch {
+      // no JSON body
+    }
+    throw new Error(`Request to /admin/posts/upload-image failed: ${res.status}${detail ? ` — ${detail}` : ""}`);
+  }
+  return res.json();
+}
+
+export function getPublicBlogPosts(): Promise<BlogPost[]> {
+  return request("/blog/posts");
+}
+
+export function getPublicBlogPost(id: string): Promise<BlogPost> {
+  return request(`/blog/posts/${encodeURIComponent(id)}`);
 }

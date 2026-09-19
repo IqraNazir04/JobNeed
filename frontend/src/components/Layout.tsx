@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { Footer } from "./Footer";
@@ -85,6 +86,12 @@ export function Layout({ children }: { children: ReactNode }) {
                 </NavItem>
               ))}
             </div>
+            <Link
+              to="/blog"
+              className="hidden whitespace-nowrap rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 sm:inline-block sm:text-sm"
+            >
+              Blog
+            </Link>
             <button
               onClick={toggleDark}
               aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}

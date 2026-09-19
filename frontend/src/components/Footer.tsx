@@ -11,6 +11,7 @@ const FEATURE_LINKS = [
 
 const ACCOUNT_LINKS = [
   { to: "#account", label: "Account" },
+  { to: "/blog", label: "Blog" },
   { to: "/admin", label: "Admin" },
 ];
 

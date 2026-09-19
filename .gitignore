@@ -15,6 +15,7 @@ dist/
 # Data / vector store
 backend/data/
 backend/chroma/
+backend/uploads/
 *.sqlite3
 *.db
 

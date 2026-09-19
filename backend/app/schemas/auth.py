@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
+
+AdminRole = Literal["admin", "editor"]
 
 
 class UserCreate(BaseModel):
@@ -44,6 +47,7 @@ class AdminLoginResponse(BaseModel):
     access_token: str | None = None
     token_type: str = "bearer"
     email: str | None = None
+    role: AdminRole | None = None
     pending_token: str | None = None
 
 
@@ -54,6 +58,7 @@ class AdminTotpLoginRequest(BaseModel):
 
 class AdminAccountOut(BaseModel):
     email: str
+    role: AdminRole
     totp_enabled: bool
     created_at: datetime
 
@@ -63,6 +68,11 @@ class AdminAccountOut(BaseModel):
 class AdminAccountCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=256)
+    role: AdminRole = "editor"
+
+
+class AdminRoleUpdateRequest(BaseModel):
+    role: AdminRole
 
 
 class AdminPasswordChangeRequest(BaseModel):
@@ -99,3 +109,27 @@ class GithubStats(BaseModel):
     top_languages: list[str] = []
     avatar_url: str = ""
     profile_url: str = ""
+
+
+class UserAdminOut(BaseModel):
+    id: str
+    email: str
+    created_at: datetime
+    linkedin_url: str = ""
+    github_username: str = ""
+
+    model_config = {"from_attributes": True}
+
+
+class ActivityItem(BaseModel):
+    type: Literal["job_posted", "user_signup"]
+    label: str
+    timestamp: datetime
+
+
+class AdminDashboardOut(BaseModel):
+    total_jobs_indexed: int
+    active_board_postings: int
+    total_users: int
+    total_admins: int
+    recent_activity: list[ActivityItem]

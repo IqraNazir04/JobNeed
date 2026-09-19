@@ -41,11 +41,14 @@ feedback on your spoken answers — all in one scrolling, single-page app.
 - **Accounts** — email/password auth with rate-limited, cost-controlled
   AI endpoints; connect your LinkedIn/Indeed/Upwork/GitHub profiles to
   personalize search and sharpen cover letters.
-- **Job board** — one or more site-owner accounts can post original listings
-  directly on JobNeed (Account section → Job board admin, its own separate
-  login). A posting is stored and indexed exactly like a scraped one, so it
-  shows up in Search and the AI Assistant automatically — no separate
-  listing page. See [Job board](#job-board) below.
+- **Admin panel** — a fully decoupled back office at **`/admin`** for
+  running the site: post job-board listings, write blog posts, manage
+  social links, view a metrics dashboard, and manage admin/user accounts
+  with role-based access and two-factor auth. See [Admin panel](#admin-panel)
+  below.
+- **Blog** — posts written from the admin panel appear at **`/blog`**,
+  with Markdown-lite formatting (headings, bold, links, lists), a featured
+  image, and tags. Draft, schedule, or publish immediately.
 
 The whole app lives on one URL with a sticky, scroll-spy nav — no page
 reloads between sections, and job details open in a modal rather than a
@@ -123,20 +126,37 @@ Trigger an ingest with `POST /api/jobs/ingest/{source}` where `{source}` is
 `jobposting_schema`, or `google_jobs`, with an optional `?query=` to filter
 by title/description. Import a single posting with `POST /api/jobs/import-url`.
 
-## Job board
+## Admin panel
 
-Beyond aggregating other sites, JobNeed can host original postings of its
-own — and the admin panel is deliberately **decoupled from regular user
-accounts**: its own `admin_accounts` table, its own login, its own
-passwords. An admin's access never depends on (or shares a password with)
-any job-seeker account that happens to use the same email.
+JobNeed's back office lives at its own route, **`/admin`** — a genuinely
+separate page (the one spot in the app that isn't a section of the
+one-pager, alongside `/blog`), reachable via a low-key link in the footer
+or main nav. It skips the marketing hero, marquee, and 3D scene entirely,
+since an admin's job there is narrow. The session persists across reloads
+via its own token, independent of whether a regular user is logged in on
+the same device or browser tab.
+
+### Decoupled from regular user accounts
+
+The admin panel is deliberately **decoupled from regular user accounts**:
+its own `admin_accounts` table, its own login (`POST /api/auth/admin-login`),
+its own passwords. An admin's access never depends on (or shares a password
+with) any job-seeker account that happens to use the same email — this was
+a deliberate design decision, not an oversight, even though it means more
+plumbing than a single unified login.
 
 `ADMIN_EMAILS` (comma-separated) and `ADMIN_PASSWORD` in `.env` only *seed*
 the first admin row(s) on startup — from then on the database is the
-source of truth, managed entirely from the panel itself:
+source of truth, managed entirely from the panel itself.
 
-- **Multiple admins** — add or remove admin accounts from the panel (the
-  last remaining admin can't be removed, so you can't lock yourself out).
+### Account management
+
+- **Multiple admins**, each with a **role** — `admin` (full access,
+  including managing other admins/roles and regular user accounts) or
+  `editor` (job board, blog, social links, and the dashboard, but not
+  account/user management). New admins default to `editor`; granting full
+  `admin` is an explicit choice. The last remaining `admin`-role account
+  can't be removed or demoted, so you can't lock yourself out.
 - **Change your own password** at any time, independent of `.env`.
 - **Two-factor authentication** — enable TOTP (Google Authenticator, Authy,
   1Password, etc.) with a scannable QR code; login then becomes a two-step
@@ -144,33 +164,58 @@ source of truth, managed entirely from the panel itself:
   that's cryptographically distinct from a full session token, so it can't
   be used to skip the second step.
 
-The panel lives at its own route, **`/admin`** — a genuinely separate page
-(the one spot in the app that isn't a section of the one-pager), reachable
-via a low-key link in the Account section or the footer. It skips the
-marketing hero, marquee, and 3D scene entirely, since an admin's job there
-is narrow. The session persists across reloads via its own token,
-independent of whether a regular user is logged in on the same device or
-browser tab.
+### Dashboard
 
-A posting goes through the exact same path as a scraped one
-(`services/ingestion.py`'s `ingest_one`) — stored as `source: "jobneed"` and
-embedded into the same vector index — so it's searchable and shows up in the
-AI Assistant immediately, ranked the same way as everything else. Closing a
-posting removes it from the vector index right away
-(`rag/vector_store.delete_job`) so it stops surfacing in search, while the
-row itself stays in Postgres for your own records.
+An at-a-glance view of the system — total jobs indexed, active board
+postings, users, and admins, a 14-day chart of jobs posted vs. user
+signups, and a merged recent-activity feed. Read-only, so both roles can
+see it.
 
-Endpoints: `POST /api/auth/admin-login` (password step; returns either a
+### Data management (CRUD)
+
+- **Job board** — post original listings directly on JobNeed. A posting
+  goes through the exact same path as a scraped one
+  (`services/ingestion.py`'s `ingest_one`) — stored as `source: "jobneed"`
+  and embedded into the same vector index — so it's searchable and shows
+  up in the AI Assistant immediately, ranked the same way as everything
+  else. Closing a posting removes it from the vector index right away
+  (`rag/vector_store.delete_job`) so it stops surfacing in search, while
+  the row itself stays in the database for your own records.
+- **Blog posts** — write, schedule, and publish posts for the public
+  `/blog` page. Content supports lightweight Markdown (headings via the
+  H1/H2/H3 toolbar, bold, italic, links, lists); a post can carry a
+  featured image (paste a URL or upload a file — stored under
+  `backend/uploads/blog/`, served at `/uploads/blog/...`) and
+  comma-separated tags. An admin-panel content calendar shows posts by
+  scheduled date. A post is only visible on `/blog` once it's marked
+  published *and* its scheduled time (if any) has passed.
+- **Social links** — manage the social media accounts JobNeed links out to.
+- **Users** — view and remove regular job-seeker accounts (`admin` role
+  only). Removing a user also clears their saved jobs and CV record.
+
+### Endpoints
+
+Auth: `POST /api/auth/admin-login` (password step; returns either a
 session token or, if 2FA is on, a short-lived `pending_token`),
 `POST /api/auth/admin-login/totp` (second step), `GET/POST /api/auth/admin-accounts`
-+ `DELETE /api/auth/admin-accounts/{email}` (manage admins), `POST /api/auth/admin-password`,
-`POST /api/auth/admin-totp/setup|confirm|disable`, and the job-board CRUD
-itself — `POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}`
++ `DELETE /api/auth/admin-accounts/{email}` + `PATCH /api/auth/admin-accounts/{email}/role`
+(manage admins and roles — `admin` role only), `POST /api/auth/admin-password`,
+`POST /api/auth/admin-totp/setup|confirm|disable`, `GET /api/auth/admin-dashboard`,
+`GET /api/auth/users` + `DELETE /api/auth/users/{id}` (`admin` role only).
+
+Job board: `POST /api/jobs/board` (create), `PATCH /api/jobs/board/{id}`
 (edit), `POST /api/jobs/board/{id}/close`, `GET /api/jobs/board/mine`.
-Every one of these (bar the two login steps) requires a valid admin session
-token — 401 with none/invalid, 403 if the account behind a *valid* token
-was since deleted — and job-board writes are scoped to `source == "jobneed"`
-so they can't touch a scraped posting.
+
+Content: `GET/POST /api/admin/posts` + `PATCH/DELETE /api/admin/posts/{id}`,
+`POST /api/admin/posts/upload-image`, `GET/POST /api/admin/social-links` +
+`PATCH/DELETE /api/admin/social-links/{id}`, `GET /api/admin/dashboard/chart-data`.
+Public, unauthenticated reads: `GET /api/blog/posts`, `GET /api/blog/posts/{id}`.
+
+Every admin-panel endpoint (bar the two login steps and the public blog
+reads) requires a valid admin session token — 401 with none/invalid, 403 if
+the account behind a *valid* token was since deleted or lacks the required
+role — and job-board writes are scoped to `source == "jobneed"` so they
+can't touch a scraped posting.
 
 ## Security notes
 
@@ -200,8 +245,9 @@ Frontend (React, one page) → /api/search, /api/chat → rag/retriever.py + rag
   CV tailoring, interview prep, and speaking feedback.
 - **Frontend**: React + Vite + TypeScript + Tailwind. Almost the whole app
   is one scrolling page with a sticky scroll-spy nav, a Three.js hero
-  visual, and section components for each feature; `/admin` is the one
-  real route, kept separate via a minimal `react-router-dom` setup.
+  visual, and section components for each feature; `/admin`, `/blog`, and
+  `/blog/:id` are the real routes, kept separate via a minimal
+  `react-router-dom` setup.
 
 ## Getting started
 
@@ -235,16 +281,19 @@ docker compose up --build
 backend/
   app/
     core/        # config, db session, JWT auth, URL safety (SSRF guard), rate limiting
-    models/      # SQLAlchemy models
+    models/      # SQLAlchemy models (incl. AdminAccount, BlogPost, SocialLink)
     schemas/     # Pydantic schemas
-    api/routes/  # FastAPI routers (jobs, search, chat, cv, interview, speaking, auth)
+    api/routes/  # FastAPI routers (jobs, search, chat, cv, interview, speaking, auth, admin_content, blog)
     scrapers/    # JobSource interface + per-site adapters
     rag/         # embeddings, vector store, retriever, chat, enrichment
     services/    # ingestion pipeline tying scrapers → db → vector store
+  uploads/blog/  # admin-uploaded blog images, served at /uploads/blog/... (gitignored)
 frontend/
   src/
     api/         # typed fetch client
-    components/  # JobCard, SearchBar, ChatPanel, JobDetailModal, MotivationScene3D, Layout, JobBoardAdmin, AdminAccountSettings
+    components/  # JobCard, SearchBar, ChatPanel, JobDetailModal, MotivationScene3D, Layout,
+                 # JobBoardAdmin, AdminAccountSettings, AdminDashboard, AdminPosts, AdminSocialLinks, AdminUsersPanel
     context/     # auth, saved-jobs, job-modal, toast providers shared across sections
-    pages/       # OnePage (composes every section) + one component per feature section; AdminPage is the one separate route
+    pages/       # OnePage (composes every section) + one component per feature section;
+                 # AdminPage, Blog, and BlogPostPage are the separate routes
 ```

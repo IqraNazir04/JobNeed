@@ -6,19 +6,26 @@ from app.api.deps import (
     ADMIN_PENDING_SUBJECT_PREFIX,
     ADMIN_SUBJECT_PREFIX,
     get_current_admin,
+    get_current_admin_account,
     get_current_user,
+    require_admin_role,
 )
 from app.core.database import get_db
 from app.core.security import create_access_token, decode_access_token, hash_password, verify_password
 from app.integrations.github import fetch_github_stats
 from app.models.admin import AdminAccount
+from app.models.cv import CVRecord
+from app.models.job import Job
+from app.models.saved_job import SavedJob
 from app.models.user import User
 from app.schemas.auth import (
     AdminAccountCreate,
     AdminAccountOut,
+    AdminDashboardOut,
     AdminLoginRequest,
     AdminLoginResponse,
     AdminPasswordChangeRequest,
+    AdminRoleUpdateRequest,
     AdminTotpConfirmRequest,
     AdminTotpDisableRequest,
     AdminTotpLoginRequest,
@@ -27,6 +34,7 @@ from app.schemas.auth import (
     LoginRequest,
     ProfileUpdateRequest,
     TokenResponse,
+    UserAdminOut,
     UserCreate,
     UserOut,
 )
@@ -110,7 +118,7 @@ def admin_login(payload: AdminLoginRequest, db: Session = Depends(get_db)):
         return AdminLoginResponse(requires_totp=True, pending_token=pending)
 
     token = create_access_token(f"{ADMIN_SUBJECT_PREFIX}{email}")
-    return AdminLoginResponse(access_token=token, email=email)
+    return AdminLoginResponse(access_token=token, email=email, role=admin.role)
 
 
 @router.post("/admin-login/totp", response_model=AdminLoginResponse)
@@ -131,7 +139,7 @@ def admin_login_totp(payload: AdminTotpLoginRequest, db: Session = Depends(get_d
         raise HTTPException(status_code=401, detail="Invalid authentication code.")
 
     token = create_access_token(f"{ADMIN_SUBJECT_PREFIX}{email}")
-    return AdminLoginResponse(access_token=token, email=email)
+    return AdminLoginResponse(access_token=token, email=email, role=admin.role)
 
 
 @router.get("/admin-accounts", response_model=list[AdminAccountOut])
@@ -143,32 +151,58 @@ def list_admin_accounts(db: Session = Depends(get_db), _admin: str = Depends(get
 def create_admin_account(
     payload: AdminAccountCreate,
     db: Session = Depends(get_db),
-    _admin: str = Depends(get_current_admin),
+    _admin: AdminAccount = Depends(require_admin_role),
 ):
-    """Add another admin. Requires being logged in as an existing admin
-    already — there's no public self-registration path onto the job-board
-    admin panel."""
+    """Add another admin. Requires being logged in as an existing account
+    with the "admin" role (not "editor") — there's no public
+    self-registration path onto the job-board admin panel, and editors
+    can't grant themselves or anyone else more access."""
     email = payload.email.strip().lower()
     if db.query(AdminAccount).filter(AdminAccount.email == email).first() is not None:
         raise HTTPException(status_code=400, detail="That email is already an admin.")
-    admin = AdminAccount(email=email, hashed_password=hash_password(payload.password))
+    admin = AdminAccount(email=email, hashed_password=hash_password(payload.password), role=payload.role)
     db.add(admin)
     db.commit()
     db.refresh(admin)
     return admin
 
 
+def _admin_role_count(db: Session) -> int:
+    return db.query(AdminAccount).filter(AdminAccount.role == "admin").count()
+
+
 @router.delete("/admin-accounts/{email}", status_code=204)
 def delete_admin_account(
     email: str,
     db: Session = Depends(get_db),
-    _admin: str = Depends(get_current_admin),
+    _admin: AdminAccount = Depends(require_admin_role),
 ):
-    if db.query(AdminAccount).count() <= 1:
-        raise HTTPException(status_code=400, detail="Can't remove the last remaining admin.")
     admin = _get_admin_or_404(db, email.strip().lower())
+    if admin.role == "admin" and _admin_role_count(db) <= 1:
+        raise HTTPException(
+            status_code=400, detail="Can't remove the last account with the admin role."
+        )
     db.delete(admin)
     db.commit()
+
+
+@router.patch("/admin-accounts/{email}/role", response_model=AdminAccountOut)
+def update_admin_role(
+    email: str,
+    payload: AdminRoleUpdateRequest,
+    db: Session = Depends(get_db),
+    _admin: AdminAccount = Depends(require_admin_role),
+):
+    admin = _get_admin_or_404(db, email.strip().lower())
+    if admin.role == "admin" and payload.role != "admin" and _admin_role_count(db) <= 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Can't demote the last account with the admin role — promote another account first.",
+        )
+    admin.role = payload.role
+    db.commit()
+    db.refresh(admin)
+    return admin
 
 
 @router.post("/admin-password")
@@ -229,3 +263,64 @@ def disable_admin_totp(
     admin.totp_secret = None
     db.commit()
     return {"status": "ok"}
+
+
+@router.get("/admin-dashboard", response_model=AdminDashboardOut)
+def admin_dashboard(
+    db: Session = Depends(get_db),
+    _admin: AdminAccount = Depends(get_current_admin_account),
+):
+    """A quick at-a-glance view of the system - available to any admin
+    (editor or admin), since it's read-only and informational."""
+    recent_jobs = (
+        db.query(Job)
+        .filter(Job.source == "jobneed")
+        .order_by(Job.fetched_at.desc())
+        .limit(5)
+        .all()
+    )
+    recent_users = db.query(User).order_by(User.created_at.desc()).limit(5).all()
+
+    activity = [
+        {"type": "job_posted", "label": f"{job.title} at {job.company}", "timestamp": job.fetched_at}
+        for job in recent_jobs
+    ] + [
+        {"type": "user_signup", "label": user.email, "timestamp": user.created_at}
+        for user in recent_users
+    ]
+    activity.sort(key=lambda item: item["timestamp"], reverse=True)
+
+    return AdminDashboardOut(
+        total_jobs_indexed=db.query(Job).count(),
+        active_board_postings=db.query(Job)
+        .filter(Job.source == "jobneed", Job.is_active.is_(True))
+        .count(),
+        total_users=db.query(User).count(),
+        total_admins=db.query(AdminAccount).count(),
+        recent_activity=activity[:8],
+    )
+
+
+@router.get("/users", response_model=list[UserAdminOut])
+def list_users(
+    db: Session = Depends(get_db),
+    _admin: AdminAccount = Depends(require_admin_role),
+):
+    return db.query(User).order_by(User.created_at.desc()).all()
+
+
+@router.delete("/users/{user_id}", status_code=204)
+def delete_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    _admin: AdminAccount = Depends(require_admin_role),
+):
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    # Clear out rows that reference this user first - Postgres enforces the
+    # foreign keys even though local dev's SQLite usually doesn't.
+    db.query(SavedJob).filter(SavedJob.user_id == user_id).delete()
+    db.query(CVRecord).filter(CVRecord.user_id == user_id).delete()
+    db.delete(user)
+    db.commit()

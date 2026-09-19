@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { AdminAccountSettings } from "../components/AdminAccountSettings";
+import { AdminDashboard } from "../components/AdminDashboard";
 import { AdminLoginForm, JobBoardAdmin } from "../components/JobBoardAdmin";
+import { AdminPosts } from "../components/AdminPosts";
+import { AdminSocialLinks } from "../components/AdminSocialLinks";
+import { AdminUsersPanel } from "../components/AdminUsersPanel";
 import { Logo } from "../components/Logo";
 import { useAdminSession } from "../hooks/useAdminSession";
 import { useDarkMode } from "../hooks/useDarkMode";
@@ -15,7 +19,7 @@ import { usePageMeta } from "../hooks/usePageMeta";
 export function AdminPage() {
   usePageMeta("Admin", "Manage JobNeed's job board listings.");
   const { dark, toggleDark } = useDarkMode();
-  const { adminEmail, checkedSession, persist, logOut } = useAdminSession();
+  const { adminEmail, adminRole, checkedSession, persist, logOut } = useAdminSession();
 
   return (
     <div className="flex min-h-screen flex-col bg-paper dark:bg-paper-dark">
@@ -65,10 +69,17 @@ export function AdminPage() {
           </p>
         </div>
         {checkedSession && !adminEmail && <AdminLoginForm onLoggedIn={persist} />}
-        {checkedSession && adminEmail && (
+        {checkedSession && adminEmail && !adminRole && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading your session…</p>
+        )}
+        {checkedSession && adminEmail && adminRole && (
           <>
+            <AdminDashboard onLoggedOut={logOut} />
             <JobBoardAdmin adminEmail={adminEmail} onLoggedOut={logOut} />
-            <AdminAccountSettings adminEmail={adminEmail} onLoggedOut={logOut} />
+            <AdminPosts onLoggedOut={logOut} />
+            <AdminSocialLinks onLoggedOut={logOut} />
+            {adminRole === "admin" && <AdminUsersPanel onLoggedOut={logOut} />}
+            <AdminAccountSettings adminEmail={adminEmail} adminRole={adminRole} onLoggedOut={logOut} />
           </>
         )}
       </main>
