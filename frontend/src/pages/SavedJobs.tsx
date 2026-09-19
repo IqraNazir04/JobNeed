@@ -3,6 +3,7 @@ import { ApplicationStatus } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
+import { TrackerIcon } from "../components/SectionIcons";
 import { useAuth } from "../context/AuthContext";
 import { useJobModal } from "../context/JobModalContext";
 import { useSavedJobs } from "../context/SavedJobsContext";
@@ -16,7 +17,7 @@ const COLUMNS: { key: ApplicationStatus; label: string; dot: string }[] = [
 ];
 
 const selectClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 outline-none focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300";
+  "w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 outline-none focus:border-transparent focus:ring-2 focus:ring-amber-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300";
 
 export function SavedJobs() {
   const { savedJobs, toggleSaved, updateStatus } = useSavedJobs();
@@ -25,9 +26,7 @@ export function SavedJobs() {
 
   return (
     <div className="relative isolate space-y-6">
-      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
-
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PageHeader
           kicker="Tracker"
           title="Your application"
@@ -39,6 +38,8 @@ export function SavedJobs() {
               you progress.
             </>
           }
+          accent="amber"
+          icon={<TrackerIcon />}
         />
         <div className="relative hidden shrink-0 sm:block">
           <motion.img
@@ -91,7 +92,7 @@ export function SavedJobs() {
                             <button
                               type="button"
                               onClick={() => openJob(job)}
-                              className="text-left font-heading text-sm font-bold leading-snug text-gray-950 hover:text-sky-600 dark:text-gray-50 dark:hover:text-sky-400"
+                              className="text-left font-heading text-sm font-bold leading-snug text-gray-950 hover:text-amber-600 dark:text-gray-50 dark:hover:text-amber-400"
                             >
                               {job.title}
                             </button>

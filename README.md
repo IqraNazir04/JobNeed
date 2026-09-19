@@ -16,6 +16,12 @@ feedback on your spoken answers — all in one scrolling, single-page app.
 | ![Search](docs/screenshots/search.png) | ![AI Assistant](docs/screenshots/assistant.png) |
 | ![Application tracker](docs/screenshots/tracker.png) | ![CV Builder](docs/screenshots/cv-builder.png) |
 | ![Interview Prep](docs/screenshots/interview-prep.png) | ![Speaking Practice](docs/screenshots/speaking-practice.png) |
+| ![Admin panel](docs/screenshots/admin.png) | ![Blog](docs/screenshots/blog.png) |
+
+Each one-page section (Home, Search, Assistant, Tracker, CV, Interview,
+Speaking) has its own accent color, icon, and tinted background panel, so
+they read as distinct screens while scrolling one continuous page — see
+[Architecture](#architecture).
 
 ## Features
 
@@ -244,10 +250,14 @@ Frontend (React, one page) → /api/search, /api/chat → rag/retriever.py + rag
   for the vector index, Anthropic's Claude for RAG answers, summarization,
   CV tailoring, interview prep, and speaking feedback.
 - **Frontend**: React + Vite + TypeScript + Tailwind. Almost the whole app
-  is one scrolling page with a sticky scroll-spy nav, a Three.js hero
-  visual, and section components for each feature; `/admin`, `/blog`, and
-  `/blog/:id` are the real routes, kept separate via a minimal
-  `react-router-dom` setup.
+  is one scrolling page with a sticky scroll-spy nav and a Three.js hero
+  visual; `/admin`, `/account`, `/blog`, and `/blog/:id` are the real
+  routes, kept separate via a minimal `react-router-dom` setup. Each
+  one-page section (Home, Search, Assistant, Tracker, CV, Interview,
+  Speaking) gets its own accent color, icon, and tinted background panel
+  (`lib/theme.ts`, `components/SectionShell.tsx`) so they read as distinct
+  screens rather than one undifferentiated column, even though it's still a
+  single continuous page.
 
 ## Getting started
 

@@ -74,7 +74,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-paper dark:bg-paper-dark">
       <header className="sticky top-0 z-20 border-b-[3px] border-double border-gray-900 bg-gray-100/90 backdrop-blur-lg dark:border-gray-100 dark:bg-gray-900/90">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-y-2 gap-x-2 px-4 py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-y-2 gap-x-2 px-4 py-4">
           <a href="#home" className="flex shrink-0 items-center">
             <Logo markClassName="h-7 w-7" wordmarkClassName="hidden sm:inline" />
           </a>
@@ -109,21 +109,21 @@ export function Layout({ children }: { children: ReactNode }) {
               )}
             </button>
             {user ? (
-              <a
-                href="#account"
+              <Link
+                to="/account"
                 title={user.email}
                 aria-label={`Account for ${user.email}`}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-600 to-yellow-600 text-xs font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:scale-105 active:scale-95"
               >
                 {user.email[0].toUpperCase()}
-              </a>
+              </Link>
             ) : (
-              <a
-                href="#account"
+              <Link
+                to="/account"
                 className="whitespace-nowrap rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 sm:text-sm"
               >
                 Log in
-              </a>
+              </Link>
             )}
           </nav>
         </div>
@@ -138,7 +138,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </span>
         </div>
       </div>
-      <main className="relative mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children}</main>
+      <main className="relative mx-auto w-full max-w-7xl flex-1 px-4 py-8">{children}</main>
       <Footer />
     </div>
   );

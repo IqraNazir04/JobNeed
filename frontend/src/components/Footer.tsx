@@ -10,7 +10,7 @@ const FEATURE_LINKS = [
 ];
 
 const ACCOUNT_LINKS = [
-  { to: "#account", label: "Account" },
+  { to: "/account", label: "Account" },
   { to: "/blog", label: "Blog" },
   { to: "/admin", label: "Admin" },
 ];
@@ -18,7 +18,7 @@ const ACCOUNT_LINKS = [
 export function Footer() {
   return (
     <footer className="dark border-t border-gray-800 bg-gray-950">
-      <div className="mx-auto grid max-w-4xl gap-8 px-4 py-10 sm:grid-cols-[1.3fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-[1.3fr_1fr_1fr]">
         <div className="space-y-2.5">
           <Logo />
           <p className="max-w-xs text-sm leading-relaxed text-gray-500 dark:text-gray-400">
@@ -65,7 +65,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-gray-200 dark:border-gray-800">
-        <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-gray-400 dark:text-gray-600 sm:flex-row">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-gray-400 dark:text-gray-600 sm:flex-row">
           <span>© {new Date().getFullYear()} JobNeed. All rights reserved.</span>
           <span>Built with Claude.</span>
         </div>

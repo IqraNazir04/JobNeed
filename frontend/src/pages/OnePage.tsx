@@ -1,20 +1,16 @@
 import { useState } from "react";
 import { JobDetailModal } from "../components/JobDetailModal";
+import { SectionShell } from "../components/SectionShell";
 import { useJobModal } from "../context/JobModalContext";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { scrollToId } from "../lib/scroll";
 import { About } from "./About";
-import { Account } from "./Account";
 import { Assistant } from "./Assistant";
 import { CVBuilder } from "./CVBuilder";
 import { Home } from "./Home";
 import { InterviewPrep } from "./InterviewPrep";
 import { SavedJobs } from "./SavedJobs";
 import { SpeakingPractice } from "./SpeakingPractice";
-
-function SectionDivider() {
-  return <div className="my-14 h-px w-full bg-gray-200 dark:bg-gray-800" aria-hidden="true" />;
-}
 
 export function OnePage() {
   usePageMeta(
@@ -27,33 +23,28 @@ export function OnePage() {
   const [speakingPrompt, setSpeakingPrompt] = useState<string | null>(null);
 
   return (
-    <>
-      <section id="home" className="scroll-mt-28">
+    <div className="space-y-14 sm:space-y-20">
+      <SectionShell id="home" accent="sky">
         <About />
-      </section>
+      </SectionShell>
 
-      <SectionDivider />
-      <section id="search" className="scroll-mt-28">
+      <SectionShell id="search" accent="emerald">
         <Home />
-      </section>
+      </SectionShell>
 
-      <SectionDivider />
-      <section id="assistant" className="scroll-mt-28">
+      <SectionShell id="assistant" accent="violet">
         <Assistant />
-      </section>
+      </SectionShell>
 
-      <SectionDivider />
-      <section id="tracker" className="scroll-mt-28">
+      <SectionShell id="tracker" accent="amber">
         <SavedJobs />
-      </section>
+      </SectionShell>
 
-      <SectionDivider />
-      <section id="cv" className="scroll-mt-28">
+      <SectionShell id="cv" accent="rose">
         <CVBuilder />
-      </section>
+      </SectionShell>
 
-      <SectionDivider />
-      <section id="interview" className="scroll-mt-28">
+      <SectionShell id="interview" accent="cyan">
         <InterviewPrep
           prefillJobId={interviewJobId}
           onAskSpeaking={(question) => {
@@ -61,17 +52,11 @@ export function OnePage() {
             scrollToId("speaking");
           }}
         />
-      </section>
+      </SectionShell>
 
-      <SectionDivider />
-      <section id="speaking" className="scroll-mt-28">
+      <SectionShell id="speaking" accent="fuchsia">
         <SpeakingPractice presetQuestion={speakingPrompt} />
-      </section>
-
-      <SectionDivider />
-      <section id="account" className="scroll-mt-28">
-        <Account />
-      </section>
+      </SectionShell>
 
       <JobDetailModal
         job={job}
@@ -82,6 +67,6 @@ export function OnePage() {
           scrollToId("interview");
         }}
       />
-    </>
+    </div>
   );
 }

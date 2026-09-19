@@ -8,6 +8,7 @@ import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { SearchBar } from "../components/SearchBar";
+import { SearchIcon } from "../components/SectionIcons";
 import { SourceFilter } from "../components/SourceFilter";
 import { useAuth } from "../context/AuthContext";
 import { useSavedJobs } from "../context/SavedJobsContext";
@@ -124,14 +125,14 @@ export function Home() {
 
   return (
     <div className="relative isolate space-y-7">
-      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
-
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PageHeader
           kicker="Search"
           title="Find your next"
           emphasis="role."
           subtitle="Search across every source JobNeed has indexed, ranked by relevance."
+          accent="emerald"
+          icon={<SearchIcon />}
         />
         <div className="relative hidden shrink-0 sm:block">
           <motion.img
@@ -153,7 +154,7 @@ export function Home() {
             type="checkbox"
             checked={personalize}
             onChange={(e) => setPersonalize(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900"
+            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500/40 dark:border-gray-700 dark:bg-gray-900"
           />
           Personalize with my profile
           {personalize && loadingProfile && <span className="text-xs text-gray-400">loading…</span>}
@@ -182,7 +183,7 @@ export function Home() {
             aria-pressed={remoteOnly}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
               remoteOnly
-                ? "bg-gradient-to-br from-sky-600 to-yellow-600 text-white shadow-sm shadow-sky-600/25"
+                ? "bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-600/25"
                 : "border border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600"
             }`}
           >
@@ -240,11 +241,11 @@ export function Home() {
       )}
 
       <div className="space-y-3">
-        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
           Beyond search
         </span>
         <h2 className="max-w-lg font-heading text-3xl font-bold leading-[1.1] text-gray-950 dark:text-gray-50 sm:text-4xl">
-          The search is just the <span className="text-sky-600 dark:text-sky-400">start.</span>
+          The search is just the <span className="text-emerald-600 dark:text-emerald-400">start.</span>
         </h2>
         <p className="max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
           Once you've found a role worth applying to, JobNeed helps you tailor your CV, prep for the

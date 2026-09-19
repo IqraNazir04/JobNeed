@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { ACCENTS, Accent } from "../lib/theme";
 
 export function PageHeader({
   kicker,
@@ -8,6 +9,8 @@ export function PageHeader({
   subtitle,
   action,
   level = "h2",
+  accent = "sky",
+  icon,
 }: {
   kicker: string;
   title: string;
@@ -16,17 +19,26 @@ export function PageHeader({
   action?: ReactNode;
   /** Each JobNeed section renders one of these; only the hero section should use "h1" so the page keeps a single, valid heading outline. */
   level?: "h1" | "h2";
+  /** Gives each one-page section its own identity (kicker color, emphasis color, icon badge) so they read as distinct screens while scrolling. */
+  accent?: Accent;
+  icon?: ReactNode;
 }) {
   const Heading = motion[level];
+  const theme = ACCENTS[accent];
   return (
     <header className="space-y-4">
       <motion.div
         initial={{ opacity: 0, x: -8 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex items-center gap-3"
+        className="flex items-center gap-2.5"
       >
-        <span className="whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
+        {icon && (
+          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${theme.badge}`}>
+            {icon}
+          </span>
+        )}
+        <span className={`whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-[0.2em] ${theme.text}`}>
           {kicker}
         </span>
         <span className="h-px flex-1 bg-gray-300 dark:bg-gray-700" />
@@ -42,7 +54,7 @@ export function PageHeader({
           {emphasis && (
             <>
               {" "}
-              <span className="text-sky-600 dark:text-sky-400">{emphasis}</span>
+              <span className={theme.text}>{emphasis}</span>
             </>
           )}
         </Heading>

@@ -1,17 +1,18 @@
 import { motion } from "framer-motion";
 import { ChatPanel } from "../components/ChatPanel";
 import { PageHeader } from "../components/PageHeader";
+import { AssistantIcon } from "../components/SectionIcons";
 
 export function Assistant() {
   return (
     <div className="relative isolate space-y-6">
-      <div className="pointer-events-none absolute -left-24 -top-24 -z-10 h-96 w-96 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
-
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PageHeader
           kicker="Assistant"
           title="Ask JobNeed"
           subtitle="Describe what you're looking for in plain language and get ranked matches with an explanation of why each one fits."
+          accent="violet"
+          icon={<AssistantIcon />}
         />
         <motion.img
           initial={{ opacity: 0, scale: 0.97 }}

@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { AccountPage } from "./pages/AccountPage";
 import { AdminPage } from "./pages/AdminPage";
 import { Blog } from "./pages/Blog";
 import { BlogPostPage } from "./pages/BlogPostPage";
@@ -9,6 +10,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/admin" element={<AdminPage />} />
+      <Route path="/account" element={<AccountPage />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:id" element={<BlogPostPage />} />
       <Route

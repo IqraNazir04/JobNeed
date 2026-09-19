@@ -6,8 +6,12 @@ import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { SearchBar } from "../components/SearchBar";
+import { InterviewIcon } from "../components/SectionIcons";
 import { useAuth } from "../context/AuthContext";
 
+// Category badge colors are semantic (question type), not tied to the
+// section's own accent color - left as-is even though the section itself
+// is themed cyan below.
 const CATEGORY_CLASS: Record<string, string> = {
   Behavioral: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-300",
   Technical: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
@@ -15,7 +19,7 @@ const CATEGORY_CLASS: Record<string, string> = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-cyan-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 
 export function InterviewPrep({
   prefillJobId,
@@ -57,7 +61,7 @@ export function InterviewPrep({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PageHeader
           kicker="Interview Prep"
           title="Prepare with"
@@ -68,6 +72,8 @@ export function InterviewPrep({
               questions and talking points{user ? " tailored to your CV" : ""}.
             </>
           }
+          accent="cyan"
+          icon={<InterviewIcon />}
         />
         <div className="relative hidden shrink-0 sm:block">
           <motion.img
@@ -99,7 +105,7 @@ export function InterviewPrep({
         <button
           onClick={() => runPrepare({ job_description: jobDescription })}
           disabled={!jobDescription.trim() || loading}
-          className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl bg-gradient-to-br from-cyan-600 to-sky-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-cyan-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Prepare
         </button>
@@ -148,7 +154,7 @@ export function InterviewPrep({
                 </ul>
                 <button
                   onClick={() => onAskSpeaking(q.question)}
-                  className="mt-2 inline-block text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
+                  className="mt-2 inline-block text-xs font-semibold text-cyan-600 hover:underline dark:text-cyan-400"
                 >
                   Practice answering this out loud →
                 </button>

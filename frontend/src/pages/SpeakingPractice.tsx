@@ -5,6 +5,7 @@ import { EmptyState } from "../components/EmptyState";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
+import { SpeakingIcon } from "../components/SectionIcons";
 
 const QUESTION_BANK = [
   "Tell me about yourself.",
@@ -20,7 +21,7 @@ const QUESTION_BANK = [
 ];
 
 const inputClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-fuchsia-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 
 // Web Speech API isn't in the standard DOM lib types.
 type SpeechRecognitionLike = {
@@ -116,12 +117,14 @@ export function SpeakingPractice({ presetQuestion }: { presetQuestion?: string |
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PageHeader
           kicker="Speaking Practice"
           title="Sound more"
           emphasis="fluent."
           subtitle="Answer out loud, and get feedback on your English — grammar, fluency, filler words, and phrasing — not just what you said."
+          accent="fuchsia"
+          icon={<SpeakingIcon />}
         />
         <motion.img
           initial={{ opacity: 0, scale: 0.97 }}
@@ -141,7 +144,7 @@ export function SpeakingPractice({ presetQuestion }: { presetQuestion?: string |
           {!presetQuestion && (
             <button
               onClick={nextQuestion}
-              className="shrink-0 text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
+              className="shrink-0 text-xs font-semibold text-fuchsia-600 hover:underline dark:text-fuchsia-400"
             >
               Next question
             </button>
@@ -168,7 +171,7 @@ export function SpeakingPractice({ presetQuestion }: { presetQuestion?: string |
               className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md transition-transform hover:brightness-110 active:scale-[0.98] ${
                 isRecording
                   ? "bg-red-600 shadow-red-600/25"
-                  : "bg-gradient-to-br from-sky-600 to-yellow-600 shadow-sky-600/25"
+                  : "bg-gradient-to-br from-fuchsia-600 to-pink-600 shadow-fuchsia-600/25"
               }`}
             >
               {isRecording && (
@@ -216,7 +219,7 @@ export function SpeakingPractice({ presetQuestion }: { presetQuestion?: string |
         <button
           onClick={handleGetFeedback}
           disabled={!transcript.trim() || loading}
-          className="mt-3 rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-3 rounded-xl bg-gradient-to-br from-fuchsia-600 to-pink-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-fuchsia-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Analyzing…" : "Get feedback"}
         </button>
@@ -234,7 +237,7 @@ export function SpeakingPractice({ presetQuestion }: { presetQuestion?: string |
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-600 to-yellow-600 text-xl font-extrabold text-white shadow-md shadow-sky-600/25"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-600 to-pink-600 text-xl font-extrabold text-white shadow-md shadow-fuchsia-600/25"
             >
               {feedback.overall_score}/10
             </motion.div>

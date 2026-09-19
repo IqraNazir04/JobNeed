@@ -3,11 +3,12 @@ import { useState } from "react";
 import { generateCoverLetter, tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
+import { CVIcon } from "../components/SectionIcons";
 import { useAuth } from "../context/AuthContext";
 import { useCV } from "../hooks/useCV";
 
 const inputClass =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-sky-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-rose-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 const labelClass = "text-xs font-semibold text-gray-500 dark:text-gray-400";
 
 export function CVBuilder() {
@@ -86,7 +87,7 @@ export function CVBuilder() {
   return (
     <div className="space-y-6">
       <div className="print:hidden">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <PageHeader
             kicker="CV Builder"
             title="Make your"
@@ -97,6 +98,8 @@ export function CVBuilder() {
                 {user ? "Synced to your account." : "Saved on this device only — log in to sync it."}
               </>
             }
+            accent="rose"
+            icon={<CVIcon />}
             action={
               <div className="flex items-center gap-3">
                 <AnimatePresence mode="wait">
@@ -114,7 +117,7 @@ export function CVBuilder() {
                 </AnimatePresence>
                 <button
                   onClick={() => window.print()}
-                  className="whitespace-nowrap rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
+                  className="whitespace-nowrap rounded-xl bg-gradient-to-br from-rose-600 to-pink-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-rose-600/25 transition-transform hover:brightness-110 active:scale-[0.98]"
                 >
                   Print / Save as PDF
                 </button>
@@ -161,7 +164,7 @@ export function CVBuilder() {
           <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-gray-900 dark:text-gray-50">Experience</h2>
-              <button onClick={addExperience} className="text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400">
+              <button onClick={addExperience} className="text-xs font-semibold text-rose-600 hover:underline dark:text-rose-400">
                 + Add role
               </button>
             </div>
@@ -189,7 +192,7 @@ export function CVBuilder() {
           <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-gray-900 dark:text-gray-50">Education</h2>
-              <button onClick={addEducation} className="text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400">
+              <button onClick={addEducation} className="text-xs font-semibold text-rose-600 hover:underline dark:text-rose-400">
                 + Add school
               </button>
             </div>
@@ -235,13 +238,13 @@ export function CVBuilder() {
               onClick={handleTailor}
               disabled={tailoring || !jobDescription.trim() || !user}
               title={!user ? "Log in to use AI tailoring" : undefined}
-              className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-gradient-to-br from-rose-600 to-pink-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-rose-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {tailoring ? "Tailoring…" : "Tailor with AI"}
             </button>
             {!user && (
               <p className="text-xs text-gray-400 dark:text-gray-500">
-                <a href="#account" className="font-semibold text-sky-600 hover:underline dark:text-sky-400">
+                <a href="/account" className="font-semibold text-rose-600 hover:underline dark:text-rose-400">
                   Log in
                 </a>{" "}
                 to use AI tailoring.
@@ -257,7 +260,7 @@ export function CVBuilder() {
                   <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">{tailorResult.tailored_summary}</p>
                   <button
                     onClick={() => update({ summary: tailorResult.tailored_summary })}
-                    className="mt-1.5 text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
+                    className="mt-1.5 text-xs font-semibold text-rose-600 hover:underline dark:text-rose-400"
                   >
                     Apply to CV
                   </button>
@@ -269,7 +272,7 @@ export function CVBuilder() {
                   </p>
                   <button
                     onClick={() => update({ skills: tailorResult.emphasized_skills })}
-                    className="mt-1.5 text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
+                    className="mt-1.5 text-xs font-semibold text-rose-600 hover:underline dark:text-rose-400"
                   >
                     Apply to CV
                   </button>
@@ -301,14 +304,14 @@ export function CVBuilder() {
             <button
               onClick={handleGenerateCoverLetter}
               disabled={generatingLetter || !jobDescription.trim() || !user}
-              className="rounded-xl bg-gradient-to-br from-sky-600 to-yellow-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-sky-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-gradient-to-br from-rose-600 to-pink-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-rose-600/25 transition-transform hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               title={!user ? "Log in to generate a cover letter" : !jobDescription.trim() ? "Paste a job description above first" : undefined}
             >
               {generatingLetter ? "Writing…" : "Generate cover letter"}
             </button>
             {!user && (
               <p className="text-xs text-gray-400 dark:text-gray-500">
-                <a href="#account" className="font-semibold text-sky-600 hover:underline dark:text-sky-400">
+                <a href="/account" className="font-semibold text-rose-600 hover:underline dark:text-rose-400">
                   Log in
                 </a>{" "}
                 to generate a cover letter.
@@ -327,7 +330,7 @@ export function CVBuilder() {
                 />
                 <button
                   onClick={handleCopyCoverLetter}
-                  className="text-xs font-semibold text-sky-600 hover:underline dark:text-sky-400"
+                  className="text-xs font-semibold text-rose-600 hover:underline dark:text-rose-400"
                 >
                   {copied ? "Copied ✓" : "Copy to clipboard"}
                 </button>

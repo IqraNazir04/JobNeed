@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { ComparisonRow, FeatureComparison } from "../components/FeatureComparison";
-import { GradientMesh } from "../components/GradientMesh";
 import { MotivationalQuote } from "../components/MotivationalQuote";
 import { PageHeader } from "../components/PageHeader";
 import { staggerContainer, staggerItem } from "../components/PageTransition";
 import { PhotoScroller, ScrollerPhoto } from "../components/PhotoScroller";
+import { HomeIcon } from "../components/SectionIcons";
 import { Slide, Slider } from "../components/Slider";
 
 const COMPARISON: ComparisonRow[] = [
@@ -125,6 +125,18 @@ const STATS = [
     ),
   },
   {
+    value: "7",
+    label: "Career tools, one page",
+    icon: (
+      <svg {...iconProps}>
+        <rect x="3" y="4" width="7" height="7" rx="1.5" />
+        <rect x="14" y="4" width="7" height="7" rx="1.5" />
+        <rect x="3" y="15" width="7" height="7" rx="1.5" />
+        <rect x="14" y="15" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
+  },
+  {
     value: "4",
     label: "AI-powered tools",
     icon: (
@@ -144,21 +156,44 @@ const STATS = [
       </svg>
     ),
   },
+  {
+    value: "24/7",
+    label: "AI availability",
+    icon: (
+      <svg {...iconProps}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3.5 2" />
+      </svg>
+    ),
+  },
+  {
+    value: "0",
+    label: "Tabs left to juggle",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    ),
+  },
+];
+
+const SOURCE_COMPARISON = [
+  { label: "Without JobNeed", value: 1, of: 9 },
+  { label: "With JobNeed", value: 9, of: 9 },
 ];
 
 export function About() {
   return (
     <div className="relative isolate space-y-10">
-      <div className="pointer-events-none absolute -left-24 -top-10 -z-10 h-80 w-80 rounded-full bg-gradient-to-br from-sky-400 to-yellow-400 opacity-[0.14] blur-3xl dark:opacity-[0.22]" />
-      <div className="pointer-events-none absolute -right-16 top-64 -z-10 h-72 w-72 rounded-full bg-gradient-to-br from-yellow-400 to-sky-400 opacity-[0.1] blur-3xl dark:opacity-[0.18]" />
-
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <PageHeader
           kicker="Home"
           title="Built for the modern"
           emphasis="job search."
           subtitle="JobNeed is a single place to search, prepare, and apply — with AI doing the tedious parts so you can focus on the roles that actually fit."
           level="h1"
+          accent="sky"
+          icon={<HomeIcon />}
         />
         <div className="relative hidden shrink-0 sm:block">
           <motion.img
@@ -184,40 +219,74 @@ export function About() {
         <MotivationalQuote />
       </div>
 
-      <GradientMesh>
-        <div className="p-6 sm:p-10">
+      <div className="relative overflow-hidden rounded-3xl border border-sky-100 bg-gradient-to-br from-sky-50 via-white to-yellow-50/60 p-6 dark:border-sky-500/10 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 sm:p-10">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40 dark:opacity-[0.08]"
+          style={{
+            backgroundImage: "radial-gradient(rgba(14,165,233,0.35) 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
+        />
+        <div className="relative">
           <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-gradient-to-r from-sky-400 to-yellow-300" />
-            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
+            <span className="h-px w-8 bg-gradient-to-r from-sky-500 to-yellow-500" />
+            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
               By the numbers
             </span>
           </div>
+
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="show"
-            className="mt-5 grid grid-cols-3 gap-3 sm:gap-4"
+            className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"
           >
             {STATS.map((s) => (
               <motion.div
                 key={s.label}
                 variants={staggerItem}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center shadow-lg shadow-black/20 backdrop-blur-xl transition-colors hover:border-white/20 hover:bg-white/[0.07] sm:p-6"
+                className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white/80 p-4 text-center shadow-sm backdrop-blur-sm transition-colors hover:border-sky-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70 dark:hover:border-sky-500/30 sm:p-6"
               >
-                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-sky-300 sm:h-10 sm:w-10">
+                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300 sm:h-10 sm:w-10">
                   {s.icon}
                 </div>
-                <div className="mt-3 bg-gradient-to-br from-sky-300 to-yellow-200 bg-clip-text font-heading text-3xl font-bold text-transparent sm:text-4xl">
+                <div className="mt-3 bg-gradient-to-br from-sky-600 to-yellow-600 bg-clip-text font-heading text-3xl font-bold text-transparent sm:text-4xl">
                   {s.value}
                 </div>
-                <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-white/70">
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   {s.label}
                 </div>
               </motion.div>
             ))}
           </motion.div>
+
+          <div className="mt-4 rounded-2xl border border-gray-200 bg-white/80 p-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/70 sm:p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Job sources searched per query
+            </p>
+            <div className="mt-3 space-y-2.5">
+              {SOURCE_COMPARISON.map((row) => (
+                <div key={row.label} className="flex items-center gap-3">
+                  <span className="w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400">{row.label}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(row.value / row.of) * 100}%` }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className={`h-2 rounded-full ${
+                        row.value === row.of ? "bg-gradient-to-r from-sky-500 to-yellow-500" : "bg-gray-400 dark:bg-gray-600"
+                      }`}
+                    />
+                  </div>
+                  <span className="w-5 shrink-0 text-right text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </GradientMesh>
+      </div>
 
       <div className="space-y-3">
         <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
