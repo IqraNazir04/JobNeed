@@ -43,12 +43,9 @@ export function AdminUsersPanel({ onLoggedOut }: { onLoggedOut: () => void }) {
 
   return (
     <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <div>
-        <h2 className="font-bold text-gray-900 dark:text-gray-50">Users</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Regular JobNeed accounts — separate from the admin panel's own accounts.
-        </p>
-      </div>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Regular JobNeed accounts — separate from the admin panel's own accounts.
+      </p>
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       {users === null && <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>}

@@ -75,14 +75,7 @@ export function AdminDashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
   }, []);
 
   return (
-    <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <div>
-        <h2 className="font-bold text-gray-900 dark:text-gray-50">Dashboard</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Key metrics and recent activity, at a glance.
-        </p>
-      </div>
-
+    <section className="space-y-4">
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {data && (
@@ -105,7 +98,7 @@ export function AdminDashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
       )}
 
       {series && (
-        <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+        <div className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Jobs posted
@@ -120,7 +113,7 @@ export function AdminDashboard({ onLoggedOut }: { onLoggedOut: () => void }) {
       )}
 
       {data && (
-        <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+        <div className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-600">
             Recent activity
           </h3>

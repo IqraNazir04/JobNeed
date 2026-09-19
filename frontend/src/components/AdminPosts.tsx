@@ -222,13 +222,11 @@ export function AdminPosts({ onLoggedOut }: { onLoggedOut: () => void }) {
   }
 
   return (
-    <section className="space-y-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <div>
-        <h2 className="font-bold text-gray-900 dark:text-gray-50">Write a post</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+    <div className="space-y-6">
+      <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Draft, schedule, and publish posts. Scheduled posts show up on the content calendar below.
         </p>
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
@@ -351,15 +349,16 @@ export function AdminPosts({ onLoggedOut }: { onLoggedOut: () => void }) {
           )}
         </div>
       </form>
+      </section>
 
-      <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <section className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-600">
           Content calendar
         </h3>
         <ContentCalendar posts={posts} />
-      </div>
+      </section>
 
-      <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <section className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-600">
           All posts
         </h3>
@@ -417,7 +416,7 @@ export function AdminPosts({ onLoggedOut }: { onLoggedOut: () => void }) {
             </div>
           </div>
         ))}
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

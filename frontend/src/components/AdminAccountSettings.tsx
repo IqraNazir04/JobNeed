@@ -401,23 +401,15 @@ export function AdminAccountSettings({
   const self = accounts?.find((a) => a.email === adminEmail);
 
   return (
-    <section className="space-y-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <div>
-        <h2 className="font-bold text-gray-900 dark:text-gray-50">Account settings</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Change your password, turn on two-factor authentication, and manage who else has admin
-          access.
-        </p>
-      </div>
-
-      <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+    <div className="space-y-6">
+      <section className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-600">
           Password
         </h3>
         <ChangePasswordForm onLoggedOut={onLoggedOut} />
-      </div>
+      </section>
 
-      <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <section className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-600">
           Two-factor authentication
         </h3>
@@ -426,9 +418,9 @@ export function AdminAccountSettings({
         ) : (
           <TwoFactorSection enabled={!!self?.totp_enabled} onChanged={reload} onLoggedOut={onLoggedOut} />
         )}
-      </div>
+      </section>
 
-      <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <section className="space-y-2 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-600">
           Admin accounts
         </h3>
@@ -443,7 +435,7 @@ export function AdminAccountSettings({
             onLoggedOut={onLoggedOut}
           />
         )}
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

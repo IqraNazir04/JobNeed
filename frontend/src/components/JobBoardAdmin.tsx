@@ -146,13 +146,7 @@ export function AdminLoginForm({
  * AdminAccountSettings, so a password change or logout there is reflected
  * here immediately too.
  */
-export function JobBoardAdmin({
-  adminEmail,
-  onLoggedOut,
-}: {
-  adminEmail: string;
-  onLoggedOut: () => void;
-}) {
+export function JobBoardAdmin({ onLoggedOut }: { onLoggedOut: () => void }) {
   const { showToast } = useToast();
   const [postings, setPostings] = useState<Job[]>([]);
   const [loadingPostings, setLoadingPostings] = useState(true);
@@ -238,21 +232,10 @@ export function JobBoardAdmin({
 
   return (
     <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-gray-900 dark:text-gray-50">Job board</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Post a job directly on JobNeed — it's indexed like any other source, so it shows up in
-            Search and the Assistant right alongside Greenhouse, Lever, and the rest.
-          </p>
-        </div>
-        <button
-          onClick={onLoggedOut}
-          className="shrink-0 whitespace-nowrap text-xs font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
-        >
-          Log out ({adminEmail})
-        </button>
-      </div>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Post a job directly on JobNeed — it's indexed like any other source, so it shows up in
+        Search and the Assistant right alongside Greenhouse, Lever, and the rest.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-2">
