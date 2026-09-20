@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.rag.speaking_coach import get_speaking_feedback
+from app.rag.speaking_coach import SpeakingFeedbackError, get_speaking_feedback
 from app.schemas.speaking import SpeakingFeedbackRequest, SpeakingFeedbackResponse
 
 router = APIRouter(prefix="/speaking", tags=["speaking"])
@@ -12,4 +12,9 @@ def feedback(payload: SpeakingFeedbackRequest):
         raise HTTPException(
             status_code=422, detail="No speech was transcribed — try recording again."
         )
-    return get_speaking_feedback(payload.question, payload.transcript)
+    try:
+        return get_speaking_feedback(payload.question, payload.transcript)
+    except SpeakingFeedbackError:
+        raise HTTPException(
+            status_code=502, detail="Couldn't get feedback right now - please try again."
+        )

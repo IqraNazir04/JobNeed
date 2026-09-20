@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { generateCoverLetter, tailorCV, TailorCVResponse } from "../api/client";
 import { CVPreview } from "../components/CVPreview";
 import { PageHeader } from "../components/PageHeader";
@@ -37,6 +37,21 @@ export function CVBuilder() {
   const [coverLetter, setCoverLetter] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // A local draft so typing "Python, " doesn't immediately lose the comma
+  // and space the moment you type it - committing on every keystroke would
+  // re-derive cv.skills by filtering out the empty trailing segment, which
+  // rewrites the input's value out from under you mid-keystroke. Only
+  // parsed into cv.skills on blur; resynced here whenever skills change for
+  // some other reason (loading a saved CV, applying an AI suggestion).
+  const [skillsDraft, setSkillsDraft] = useState(cv.skills.join(", "));
+  useEffect(() => {
+    setSkillsDraft(cv.skills.join(", "));
+  }, [cv.skills]);
+
+  function commitSkillsDraft(value: string) {
+    update({ skills: value.split(",").map((s) => s.trim()).filter(Boolean) });
+  }
+
   function backendCV() {
     return {
       ...cv,
@@ -53,7 +68,9 @@ export function CVBuilder() {
     try {
       setTailorResult(await tailorCV(backendCV(), jobDescription));
     } catch (e) {
-      setTailorError(e instanceof Error ? e.message : "Couldn't tailor your CV right now.");
+      setTailorError(
+        e instanceof Error ? e.message.split(" — ")[1] || "Couldn't tailor your CV right now." : "Couldn't tailor your CV right now."
+      );
     } finally {
       setTailoring(false);
     }
@@ -68,7 +85,11 @@ export function CVBuilder() {
       const res = await generateCoverLetter(backendCV(), jobDescription, companyName, letterJobTitle);
       setCoverLetter(res.cover_letter);
     } catch (e) {
-      setLetterError(e instanceof Error ? e.message : "Couldn't generate a cover letter right now.");
+      setLetterError(
+        e instanceof Error
+          ? e.message.split(" — ")[1] || "Couldn't generate a cover letter right now."
+          : "Couldn't generate a cover letter right now."
+      );
     } finally {
       setGeneratingLetter(false);
     }
@@ -216,16 +237,24 @@ export function CVBuilder() {
             <input
               className={inputClass}
               placeholder="Python, SQL, Project Management"
-              value={cv.skills.join(", ")}
-              onChange={(e) => update({ skills: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+              value={skillsDraft}
+              onChange={(e) => setSkillsDraft(e.target.value)}
+              onBlur={(e) => commitSkillsDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitSkillsDraft(skillsDraft);
+                }
+              }}
             />
           </section>
 
           <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <h2 className="font-bold text-gray-900 dark:text-gray-50">Tailor for a job</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Paste a job description and Claude will suggest a tailored summary and which of your
-              skills to lead with.
+              Paste a job description and Claude will suggest a tailored summary, which of your
+              skills to lead with, and other role-relevant skills worth adding if they're true for
+              you.
             </p>
             <textarea
               className={inputClass}
@@ -277,6 +306,27 @@ export function CVBuilder() {
                     Apply to CV
                   </button>
                 </div>
+                {tailorResult.suggested_new_skills.length > 0 && (
+                  <div>
+                    <p className={labelClass}>This role also mentions</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Add any of these only if they're actually true for you.
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {tailorResult.suggested_new_skills
+                        .filter((s) => !cv.skills.includes(s))
+                        .map((skill) => (
+                          <button
+                            key={skill}
+                            onClick={() => update({ skills: [...cv.skills, skill] })}
+                            className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
+                          >
+                            + {skill}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
                 <p className="text-xs italic text-gray-500 dark:text-gray-400">{tailorResult.notes}</p>
               </div>
             )}
@@ -285,7 +335,12 @@ export function CVBuilder() {
           <section className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <h2 className="font-bold text-gray-900 dark:text-gray-50">Cover letter</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Uses the job description above, plus your CV, to draft a letter you can edit and send.
+              Uses the job description above, your CV, and your connected LinkedIn/Indeed/Upwork/
+              GitHub profiles from{" "}
+              <a href="/account" className="font-semibold text-rose-600 hover:underline dark:text-rose-400">
+                your account
+              </a>{" "}
+              to draft a letter you can edit and send.
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               <input

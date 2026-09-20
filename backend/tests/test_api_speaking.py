@@ -30,6 +30,21 @@ def test_feedback_rejects_whitespace_only_transcript(client):
     assert res.status_code == 422
 
 
+def test_feedback_returns_clean_502_when_model_output_is_unparseable(client):
+    from app.rag.speaking_coach import SpeakingFeedbackError
+
+    def _raise(*_args, **_kwargs):
+        raise SpeakingFeedbackError("boom")
+
+    with patch("app.api.routes.speaking.get_speaking_feedback", side_effect=_raise):
+        res = client.post(
+            "/api/speaking/feedback",
+            json={"question": "Tell me about yourself.", "transcript": "I did the migration."},
+        )
+    assert res.status_code == 502
+    assert "try again" in res.json()["detail"].lower()
+
+
 def test_feedback_returns_analysis(client):
     with patch("app.api.routes.speaking.get_speaking_feedback", side_effect=_fake_feedback):
         res = client.post(

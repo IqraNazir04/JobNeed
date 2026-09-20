@@ -98,11 +98,13 @@ export function SpeakingPractice({ presetQuestion }: { presetQuestion?: string |
     try {
       setFeedback(await getSpeakingFeedback(question, transcript));
     } catch (e) {
-      setError(
-        e instanceof Error && e.message.includes("422")
-          ? "No speech was captured — try recording or typing your answer first."
-          : "Couldn't get feedback right now."
-      );
+      if (e instanceof Error && e.message.includes("422")) {
+        setError("No speech was captured — try recording or typing your answer first.");
+      } else {
+        setError(
+          e instanceof Error ? e.message.split(" — ")[1] || "Couldn't get feedback right now." : "Couldn't get feedback right now."
+        );
+      }
     } finally {
       setLoading(false);
     }

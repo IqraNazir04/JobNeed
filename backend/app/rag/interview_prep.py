@@ -1,4 +1,5 @@
 import json
+import re
 
 import anthropic
 
@@ -27,6 +28,12 @@ _SYSTEM_PROMPT = (
     '"research_tips": ["...", "...", "..."]}'
 )
 
+_JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
+
+
+class InterviewPrepError(Exception):
+    """The model didn't return a parseable response after retrying."""
+
 
 def _extract_json(text: str) -> dict:
     text = text.strip()
@@ -34,17 +41,11 @@ def _extract_json(text: str) -> dict:
         text = text.strip("`")
         if text.startswith("json"):
             text = text[4:]
-    return json.loads(text)
+    match = _JSON_OBJECT.search(text)
+    return json.loads(match.group(0) if match else text)
 
 
-def generate_interview_prep(
-    job: Job | None, raw_description: str | None, cv: CVData | None
-) -> InterviewPrepResponse:
-    if job is not None:
-        title, company, description = job.title, job.company, job.description
-    else:
-        title, company, description = "", "", raw_description or ""
-
+def _call_model(title: str, company: str, description: str, cv: CVData | None) -> str:
     prompt_parts = [f"Job posting:\nTitle: {title}\nCompany: {company}\n{description}"]
     if cv is not None:
         prompt_parts.append(f"Candidate CV:\n{cv.model_dump_json(indent=2)}")
@@ -56,7 +57,23 @@ def generate_interview_prep(
         system=_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}],
     )
-    text = "".join(block.text for block in response.content if block.type == "text")
-    data = _extract_json(text)
+    return "".join(block.text for block in response.content if block.type == "text")
 
-    return InterviewPrepResponse(job_title=title or "This role", company=company, **data)
+
+def generate_interview_prep(
+    job: Job | None, raw_description: str | None, cv: CVData | None
+) -> InterviewPrepResponse:
+    if job is not None:
+        title, company, description = job.title, job.company, job.description
+    else:
+        title, company, description = "", "", raw_description or ""
+
+    last_error: Exception | None = None
+    for _attempt in range(2):
+        text = _call_model(title, company, description, cv)
+        try:
+            data = _extract_json(text)
+            return InterviewPrepResponse(job_title=title or "This role", company=company, **data)
+        except (json.JSONDecodeError, ValueError) as e:
+            last_error = e
+    raise InterviewPrepError("The model didn't return a usable response after retrying.") from last_error

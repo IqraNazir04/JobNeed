@@ -67,6 +67,7 @@ export interface CVData {
 export interface TailorCVResponse {
   tailored_summary: string;
   emphasized_skills: string[];
+  suggested_new_skills: string[];
   notes: string;
 }
 

@@ -43,11 +43,13 @@ export function InterviewPrep({
       const cv = user ? await getMyCV().catch(() => undefined) : undefined;
       setResult(await prepareInterview({ ...payload, cv }));
     } catch (e) {
-      setError(
-        e instanceof Error && e.message.includes("404")
-          ? "Couldn't find a matching indexed job. Try pasting the job description instead."
-          : "Couldn't generate interview prep right now."
-      );
+      if (e instanceof Error && e.message.includes("404")) {
+        setError("Couldn't find a matching indexed job. Try pasting the job description instead.");
+      } else {
+        setError(
+          e instanceof Error ? e.message.split(" — ")[1] || "Couldn't generate interview prep right now." : "Couldn't generate interview prep right now."
+        );
+      }
     } finally {
       setLoading(false);
     }

@@ -34,7 +34,9 @@ html {
     visibility: visible;
   }
   #cv-print-area {
-    position: absolute;
+    /* fixed (not absolute) so this escapes to the viewport regardless of
+       any ancestor that establishes its own positioning context. */
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;

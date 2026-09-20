@@ -63,6 +63,20 @@ def test_prepare_by_query_with_no_matches_404s(client):
     assert res.status_code == 404
 
 
+def test_prepare_returns_clean_502_when_model_output_is_unparseable(client):
+    from app.rag.interview_prep import InterviewPrepError
+
+    def _raise(*_args, **_kwargs):
+        raise InterviewPrepError("boom")
+
+    with patch("app.api.routes.interview.generate_interview_prep", side_effect=_raise):
+        res = client.post(
+            "/api/interview/prepare", json={"job_description": "We need an engineer."}
+        )
+    assert res.status_code == 502
+    assert "try again" in res.json()["detail"].lower()
+
+
 def test_prepare_by_raw_description(client):
     with patch(
         "app.api.routes.interview.generate_interview_prep", side_effect=_fake_prep

@@ -1,8 +1,10 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import pytest
+
 from app.models.job import Job
-from app.rag.interview_prep import generate_interview_prep
+from app.rag.interview_prep import InterviewPrepError, generate_interview_prep
 from app.schemas.cv import CVData
 
 FAKE_REPLY = """{
@@ -89,3 +91,24 @@ def test_generate_interview_prep_strips_markdown_fences():
         result = generate_interview_prep(job=_job(), raw_description=None, cv=None)
 
     assert len(result.questions) == 2
+
+
+def test_generate_interview_prep_retries_once_on_malformed_json():
+    bad_reply = _fake_response("Sorry, I can't help with that.")
+    good_reply = _fake_response(FAKE_REPLY)
+    with patch(
+        "app.rag.interview_prep._client.messages.create", side_effect=[bad_reply, good_reply]
+    ) as mock_create:
+        result = generate_interview_prep(job=_job(), raw_description=None, cv=None)
+
+    assert len(result.questions) == 2
+    assert mock_create.call_count == 2
+
+
+def test_generate_interview_prep_raises_after_two_malformed_replies():
+    bad_reply = _fake_response("Sorry, I can't help with that.")
+    with patch("app.rag.interview_prep._client.messages.create", return_value=bad_reply) as mock_create:
+        with pytest.raises(InterviewPrepError):
+            generate_interview_prep(job=_job(), raw_description=None, cv=None)
+
+    assert mock_create.call_count == 2

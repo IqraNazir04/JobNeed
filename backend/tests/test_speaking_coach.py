@@ -1,7 +1,9 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from app.rag.speaking_coach import get_speaking_feedback
+import pytest
+
+from app.rag.speaking_coach import SpeakingFeedbackError, get_speaking_feedback
 
 FAKE_REPLY = """{
   "overall_score": 7,
@@ -68,3 +70,44 @@ def test_get_speaking_feedback_handles_no_grammar_notes():
 
     assert result.grammar_notes == []
     assert result.filler_word_count == 0
+
+
+def test_get_speaking_feedback_handles_omitted_grammar_notes_key():
+    # The real bug this guards against: the model follows the prompt's "omit
+    # if grammar was already correct" instruction literally and drops the
+    # key entirely, rather than sending an empty list for it.
+    reply = """{
+      "overall_score": 9,
+      "strengths": ["Excellent grammar", "Confident delivery"],
+      "filler_word_count": 0,
+      "vocabulary_suggestions": [],
+      "improved_answer": "Great answer as is."
+    }"""
+    with patch(
+        "app.rag.speaking_coach._client.messages.create",
+        return_value=_fake_response(reply),
+    ):
+        result = get_speaking_feedback("Q", "A perfectly spoken answer.")
+
+    assert result.grammar_notes == []
+
+
+def test_get_speaking_feedback_retries_once_on_malformed_json():
+    bad_reply = _fake_response("Sorry, I can't help with that.")
+    good_reply = _fake_response(FAKE_REPLY)
+    with patch(
+        "app.rag.speaking_coach._client.messages.create", side_effect=[bad_reply, good_reply]
+    ) as mock_create:
+        result = get_speaking_feedback("Q", "A")
+
+    assert result.overall_score == 7
+    assert mock_create.call_count == 2
+
+
+def test_get_speaking_feedback_raises_after_two_malformed_replies():
+    bad_reply = _fake_response("Sorry, I can't help with that.")
+    with patch("app.rag.speaking_coach._client.messages.create", return_value=bad_reply) as mock_create:
+        with pytest.raises(SpeakingFeedbackError):
+            get_speaking_feedback("Q", "A")
+
+    assert mock_create.call_count == 2

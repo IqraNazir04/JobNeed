@@ -1,4 +1,5 @@
 import json
+import re
 
 import anthropic
 
@@ -18,17 +19,24 @@ _SYSTEM_PROMPT = (
     "Produce: an overall_score from 1-10 for English fluency and clarity, "
     "2-3 genuine strengths in how they expressed themselves, a list of "
     "specific grammar corrections (each with the original phrase, a "
-    "corrected phrase, and a one-sentence explanation - omit this list if "
-    "their grammar was already correct), a count of filler words used ('um', "
-    "'uh', 'like', 'you know', etc.), 2-3 vocabulary or phrasing suggestions "
-    "to sound more natural or professional, and a rewritten improved_answer "
-    "that keeps their original meaning and content but fixes the English.\n\n"
+    "corrected phrase, and a one-sentence explanation - use an empty list "
+    "if their grammar was already correct, never omit the field), a count "
+    "of filler words used ('um', 'uh', 'like', 'you know', etc.), 2-3 "
+    "vocabulary or phrasing suggestions to sound more natural or "
+    "professional, and a rewritten improved_answer that keeps their "
+    "original meaning and content but fixes the English.\n\n"
     "Respond with ONLY a JSON object, no markdown fences, no commentary, "
     'shaped exactly like: {"overall_score": 7, "strengths": ["...", "..."], '
     '"grammar_notes": [{"original": "...", "suggestion": "...", '
     '"explanation": "..."}], "filler_word_count": 3, '
     '"vocabulary_suggestions": ["...", "..."], "improved_answer": "..."}'
 )
+
+_JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
+
+
+class SpeakingFeedbackError(Exception):
+    """The model didn't return a parseable response after retrying."""
 
 
 def _extract_json(text: str) -> dict:
@@ -37,17 +45,27 @@ def _extract_json(text: str) -> dict:
         text = text.strip("`")
         if text.startswith("json"):
             text = text[4:]
-    return json.loads(text)
+    match = _JSON_OBJECT.search(text)
+    return json.loads(match.group(0) if match else text)
 
 
-def get_speaking_feedback(question: str, transcript: str) -> SpeakingFeedbackResponse:
+def _call_model(question: str, transcript: str) -> str:
     prompt = f"Interview question: {question}\n\nCandidate's spoken answer (transcribed): {transcript}"
-
     response = _client.messages.create(
         model=settings.anthropic_model,
         max_tokens=1000,
         system=_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}],
     )
-    text = "".join(block.text for block in response.content if block.type == "text")
-    return SpeakingFeedbackResponse(**_extract_json(text))
+    return "".join(block.text for block in response.content if block.type == "text")
+
+
+def get_speaking_feedback(question: str, transcript: str) -> SpeakingFeedbackResponse:
+    last_error: Exception | None = None
+    for _attempt in range(2):
+        text = _call_model(question, transcript)
+        try:
+            return SpeakingFeedbackResponse(**_extract_json(text))
+        except (json.JSONDecodeError, ValueError) as e:
+            last_error = e
+    raise SpeakingFeedbackError("The model didn't return a usable response after retrying.") from last_error

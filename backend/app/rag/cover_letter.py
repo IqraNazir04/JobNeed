@@ -14,16 +14,28 @@ _SYSTEM_PROMPT = (
     "closing. Plain prose, no markdown, no placeholders like [Company Name] "
     "- use the company/role names given. Do not include a salutation or "
     "signature line; the caller adds those.\n\n"
+    "You may also receive additional candidate profile context (their "
+    "LinkedIn/Indeed/Upwork links and GitHub bio/top languages, pulled from "
+    "their connected accounts). Weave in genuinely relevant details from it "
+    "- e.g. real GitHub languages that match the role's stack - but never "
+    "fabricate employers, titles, or achievements beyond what the CV or this "
+    "context actually states.\n\n"
     "Respond with ONLY the letter body text, no commentary, no JSON."
 )
 
 
 def generate_cover_letter(
-    cv: CVData, job_description: str, company: str = "", job_title: str = ""
+    cv: CVData,
+    job_description: str,
+    company: str = "",
+    job_title: str = "",
+    profile_context: str = "",
 ) -> CoverLetterResponse:
     context = f"Company: {company}\nRole: {job_title}\n" if company or job_title else ""
+    profile_block = f"Candidate's other profiles:\n{profile_context}\n\n" if profile_context else ""
     prompt = (
         f"Candidate CV data:\n{cv.model_dump_json(indent=2)}\n\n"
+        f"{profile_block}"
         f"{context}Target job description:\n{job_description}"
     )
     response = _client.messages.create(

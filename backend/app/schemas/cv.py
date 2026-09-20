@@ -34,6 +34,7 @@ class TailorCVRequest(BaseModel):
 class TailorCVResponse(BaseModel):
     tailored_summary: str
     emphasized_skills: list[str]
+    suggested_new_skills: list[str] = []
     notes: str
 
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.job import Job
-from app.rag.interview_prep import generate_interview_prep
+from app.rag.interview_prep import InterviewPrepError, generate_interview_prep
 from app.rag.retriever import retrieve_jobs
 from app.schemas.interview import InterviewPrepRequest, InterviewPrepResponse
 
@@ -37,4 +37,9 @@ def prepare(payload: InterviewPrepRequest, db: Session = Depends(get_db)):
             status_code=422, detail="Provide a job_id, a query, or a job_description."
         )
 
-    return generate_interview_prep(job=job, raw_description=raw_description, cv=payload.cv)
+    try:
+        return generate_interview_prep(job=job, raw_description=raw_description, cv=payload.cv)
+    except InterviewPrepError:
+        raise HTTPException(
+            status_code=502, detail="Couldn't generate interview prep right now - please try again."
+        )
